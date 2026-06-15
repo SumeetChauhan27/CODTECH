@@ -119,12 +119,16 @@ codtech-data-viz-dashboard/
 
 ## 📸 Screenshots
 
-*(Add your high-resolution screenshots here once deployed!)*
+
 
 - **Dashboard View:** Shows KPI cards with sparklines and toggleable charts.
+![alt text](image-1.png)
 - **Analytics View:** Shows Nivo/Recharts integration with dynamic Stacked/Overlap modes.
+![alt text](image-2.png)
 - **Reports Table:** Shows filtering, sorting, and pagination.
+![alt text](image-3.png)
 - **Settings View:** Shows global accent and theme customization.
+![alt text](image-4.png)
 
 ---
 
