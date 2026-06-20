@@ -147,11 +147,18 @@ codtech-realtime-chat-app/
 
 ---
 
+## 🌐 Deployment
+The application is fully hosted and live! You can access it here:
+**👉 [ChatFlow Live Demo](https://chatflow-gules-delta.vercel.app/)**
+
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome!
 
 ## 📜 License
 This project is open-source and available under the [MIT License](LICENSE).
+
+## 👨‍💻 Author
+Sumeet Kailash Chauhan — [@SumeetChauhan27](https://github.com/SumeetChauhan27)
 
 ---
 **Crafted with ❤️ by Sumeet Chauhan for CODTECH IT Solutions.**
