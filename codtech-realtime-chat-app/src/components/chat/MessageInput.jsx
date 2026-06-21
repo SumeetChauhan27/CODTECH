@@ -6,14 +6,19 @@ import { useAuth } from "../../context/AuthContext";
 import EmojiPicker from "emoji-picker-react";
 import { useTypingIndicator } from "../../hooks/useTypingIndicator";
 import TypingIndicator from "./TypingIndicator";
+import { useImageUpload } from "../../hooks/useImageUpload";
+import ImageDropzone from "./ImageDropzone";
 
 export default function MessageInput({ roomData }) {
   const [text, setText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  
   const { currentUser } = useAuth();
   const pickerRef = useRef(null);
   const { typingString, handleTyping, clearTyping } = useTypingIndicator(roomData?.id);
+  const { uploadImage, progress, error, isUploading, setError } = useImageUpload();
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -27,7 +32,7 @@ export default function MessageInput({ roomData }) {
 
   const handleSend = async (e) => {
     if (e) e.preventDefault();
-    if (!text.trim() || !roomData) return;
+    if ((!text.trim() && !selectedFile) || !roomData || isUploading || isSending) return;
 
     const currentName = currentUser.displayName || currentUser.email.split("@")[0];
 
@@ -35,11 +40,27 @@ export default function MessageInput({ roomData }) {
       setIsSending(true);
       setShowEmojiPicker(false);
       
+      let uploadedFileURL = null;
+      if (selectedFile) {
+        uploadedFileURL = await uploadImage(selectedFile, `rooms/${roomData.id}`);
+        if (!uploadedFileURL) {
+          setIsSending(false);
+          return; // Upload failed
+        }
+      }
+      
+      const isImage = selectedFile?.type?.startsWith('image/');
+
       const payload = {
         uid: currentUser.uid,
         displayName: currentName,
         photoURL: currentUser.photoURL || "",
         text: text.trim(),
+        imageURL: isImage ? uploadedFileURL : null,
+        fileURL: !isImage && selectedFile ? uploadedFileURL : null,
+        fileName: selectedFile ? selectedFile.name : null,
+        fileType: selectedFile ? selectedFile.type : null,
+        fileSize: selectedFile ? selectedFile.size : null,
         createdAt: serverTimestamp(),
         readBy: {
           [currentUser.uid]: {
@@ -50,10 +71,9 @@ export default function MessageInput({ roomData }) {
         reactions: {}
       };
       
-      console.log("Sending message payload:", payload);
-      
       await addDoc(collection(db, "rooms", roomData.id, "messages"), payload);
       setText("");
+      setSelectedFile(null);
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -99,37 +119,54 @@ export default function MessageInput({ roomData }) {
 
       <form 
         onSubmit={handleSend} 
-        className="px-4 py-3 bg-white/80 backdrop-blur-xl border-t border-zinc-200/60 flex items-end gap-3 shrink-0 relative z-20"
+        className="px-4 py-3 bg-white/80 backdrop-blur-xl border-t border-zinc-200/60 shrink-0 relative z-20"
       >
-        <div className="flex-1 bg-zinc-100/80 rounded-2xl flex items-end px-4 py-2 border border-zinc-200/50 transition-colors focus-within:bg-white focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/10">
-          <button
-            type="button"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="p-1.5 text-zinc-400 hover:text-blue-500 transition-colors shrink-0 mb-0.5 -ml-1"
-          >
-            <Smile className="w-6 h-6" />
-          </button>
+        {isUploading && progress > 0 && (
+          <div className="absolute top-0 left-0 right-0 h-1 bg-blue-100 rounded-t-xl overflow-hidden">
+            <div 
+              className="h-full bg-blue-500 transition-all duration-300 ease-out" 
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+
+        <div className="flex items-end gap-3">
+          <div className="flex-1 bg-zinc-100/80 rounded-2xl flex items-end px-4 py-2 border border-zinc-200/50 transition-colors focus-within:bg-white focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/10">
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="p-1.5 text-zinc-400 hover:text-blue-500 transition-colors shrink-0 mb-0.5 -ml-1"
+            >
+              <Smile className="w-6 h-6" />
+            </button>
+
+            <ImageDropzone 
+              selectedFile={selectedFile}
+              onFileSelected={setSelectedFile}
+              onClear={() => setSelectedFile(null)}
+            />
+            
+            <textarea
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+                handleTyping();
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="Type a message..."
+              rows={text.split("\n").length > 3 ? 3 : text.split("\n").length}
+              className="w-full max-h-32 bg-transparent focus:outline-none resize-none text-[15px] py-1.5 scrollbar-thin ml-2 text-zinc-800 placeholder:text-zinc-400"
+            />
+          </div>
           
-          <textarea
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              handleTyping();
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
-            rows={text.split("\n").length > 3 ? 3 : text.split("\n").length}
-            className="w-full max-h-32 bg-transparent focus:outline-none resize-none text-[15px] py-1.5 scrollbar-thin ml-2 text-zinc-800 placeholder:text-zinc-400"
-          />
+          <button
+            type="submit"
+            disabled={(!text.trim() && !selectedFile) || isUploading || isSending}
+            className="w-11 h-11 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-all hover:scale-105 active:scale-95 shrink-0 shadow-md shadow-blue-600/20"
+          >
+            <Send className="w-5 h-5 ml-0.5" />
+          </button>
         </div>
-        
-        <button
-          type="submit"
-          disabled={!text.trim() || isSending}
-          className="w-11 h-11 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-all hover:scale-105 active:scale-95 shrink-0 shadow-md shadow-blue-600/20"
-        >
-          <Send className="w-5 h-5 ml-0.5" />
-        </button>
       </form>
     </div>
   );

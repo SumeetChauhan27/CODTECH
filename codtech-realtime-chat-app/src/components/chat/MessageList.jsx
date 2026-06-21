@@ -4,8 +4,9 @@ import { db } from "../../services/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, CheckCheck, Info, X, Trash2, Pin, Star, Copy } from "lucide-react";
+import { Check, CheckCheck, Info, X, Trash2, Pin, Star, Copy, FileText } from "lucide-react";
 import ProfileViewModal from "../profile/ProfileViewModal";
+import ImageLightbox from "./ImageLightbox";
 
 const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮","😭"];
 
@@ -17,6 +18,7 @@ export default function MessageList({ roomData }) {
   const [infoMsg, setInfoMsg] = useState(null); 
   const [contextMenu, setContextMenu] = useState(null); // { x, y, msg }
   const [selectedProfileUid, setSelectedProfileUid] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const bottomRef = useRef(null);
   const menuRef = useRef(null);
   const { currentUser } = useAuth();
@@ -281,14 +283,41 @@ export default function MessageList({ roomData }) {
                 )}
               </AnimatePresence>
 
-              <div className={`max-w-[85vw] sm:max-w-[60vw] px-4 py-2.5 rounded-2xl shadow-sm relative transition-all group-hover:shadow-md cursor-context-menu ${
+              <div className={`max-w-[85vw] sm:max-w-[60vw] px-4 py-2 rounded-2xl shadow-sm relative transition-all group-hover:shadow-md cursor-context-menu ${
                 isOwn 
                   ? "bg-indigo-600 text-white rounded-br-sm" 
                   : "bg-white text-zinc-900 rounded-tl-sm border border-zinc-200/60"
               } ${msg.isPinned ? 'ring-2 ring-orange-400/50' : ''}`}>
-                <p className="text-[15px] whitespace-pre-wrap leading-relaxed pb-3 pr-4 font-medium tracking-tight">
-                  {msg.text}
-                </p>
+                {msg.imageURL && (
+                  <div className="mb-2 -mx-2 -mt-1 rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity" onClick={(e) => { e.stopPropagation(); setSelectedImage(msg.imageURL); }}>
+                    <img src={msg.imageURL} alt="Shared image" className="max-w-full max-h-64 object-cover" />
+                  </div>
+                )}
+                {msg.fileURL && (
+                  <a 
+                    href={msg.fileURL} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 bg-black/5 hover:bg-black/10 transition-colors p-3 rounded-xl mb-2 -mx-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className={`p-2 rounded-lg ${isOwn ? 'bg-indigo-500 text-white' : 'bg-white text-indigo-500'}`}>
+                      <FileText className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{msg.fileName || 'Attachment'}</p>
+                      <p className={`text-xs ${isOwn ? 'text-indigo-200' : 'text-zinc-500'}`}>
+                        {msg.fileSize ? (msg.fileSize / 1024 / 1024).toFixed(2) + ' MB' : 'Download'}
+                      </p>
+                    </div>
+                  </a>
+                )}
+                {msg.text && (
+                  <p className="text-[15px] whitespace-pre-wrap leading-relaxed font-medium tracking-tight">
+                    {msg.text}
+                    <span className="inline-block w-14 h-4" />
+                  </p>
+                )}
                 
                 <div 
                   className="absolute bottom-1 right-2.5 flex items-center gap-1.5 cursor-pointer"
@@ -453,6 +482,11 @@ export default function MessageList({ roomData }) {
           />
         )}
       </AnimatePresence>
+
+      <ImageLightbox 
+        imageURL={selectedImage} 
+        onClose={() => setSelectedImage(null)} 
+      />
     </div>
   );
 }
