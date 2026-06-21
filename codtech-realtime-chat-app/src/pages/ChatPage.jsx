@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/layout/Sidebar";
 import MessageList from "../components/chat/MessageList";
 import MessageInput from "../components/chat/MessageInput";
-import { LogOut, Menu, Key, ShieldCheck, X, Pin } from "lucide-react";
+import { LogOut, Menu, Key, ShieldCheck, X, Pin, Search } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useParams } from "react-router-dom";
 import { doc, onSnapshot, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
@@ -11,6 +11,7 @@ import { db, rtdb } from "../services/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileEditModal from "../components/profile/ProfileEditModal";
 import PinnedMessagesPanel from "../components/chat/PinnedMessagesPanel";
+import MessageSearchModal from "../components/chat/MessageSearchModal";
 
 export default function ChatPage() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function ChatPage() {
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [showPinnedPanel, setShowPinnedPanel] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const [myPresence, setMyPresence] = useState("offline");
   
   const { currentUser, logout } = useAuth();
@@ -36,6 +38,19 @@ export default function ChatPage() {
     });
     return () => unsubscribe();
   }, [currentUser]);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        if (currentRoomId && roomData?.members?.includes(currentUser.uid)) {
+          setShowSearchModal(true);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [currentRoomId, roomData, currentUser.uid]);
 
   useEffect(() => {
     if (!currentRoomId) {
@@ -149,6 +164,19 @@ export default function ChatPage() {
 
             {isMember && (
               <button
+                onClick={() => setShowSearchModal(true)}
+                className="p-2.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all group active:scale-95 flex items-center gap-2"
+                title="Search Messages (Ctrl+K)"
+              >
+                <Search className="w-5 h-5" />
+                <span className="hidden lg:flex items-center gap-1 text-[10px] font-bold text-zinc-400 bg-zinc-100 group-hover:bg-blue-100 group-hover:text-blue-600 px-1.5 py-0.5 rounded-md transition-colors">
+                  <span className="font-sans">⌘</span>K
+                </span>
+              </button>
+            )}
+
+            {isMember && (
+              <button
                 onClick={() => setShowPinnedPanel(!showPinnedPanel)}
                 className={`p-2.5 rounded-xl transition-all group active:scale-95 ${
                   showPinnedPanel ? 'bg-orange-100 text-orange-600' : 'text-zinc-400 hover:text-orange-500 hover:bg-orange-50'
@@ -192,6 +220,15 @@ export default function ChatPage() {
         <AnimatePresence>
           {showProfileEdit && (
             <ProfileEditModal onClose={() => setShowProfileEdit(false)} />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showSearchModal && roomData && (
+            <MessageSearchModal 
+              roomData={roomData} 
+              onClose={() => setShowSearchModal(false)} 
+            />
           )}
         </AnimatePresence>
 
