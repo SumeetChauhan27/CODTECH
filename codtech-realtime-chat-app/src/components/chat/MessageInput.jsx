@@ -87,6 +87,17 @@ export default function MessageInput({ roomData, editingMessage, setEditingMessa
         };
         
         await addDoc(collection(db, "rooms", roomData.id, "messages"), payload);
+
+        // Update room with lastMessage for notifications and unread badges
+        await updateDoc(doc(db, "rooms", roomData.id), {
+          lastMessage: {
+            text: text.trim() || (isImage ? "📷 Photo" : "📎 Attachment"),
+            senderName: currentName,
+            senderUid: currentUser.uid,
+            createdAt: serverTimestamp()
+          }
+        });
+
         setText("");
         setSelectedFile(null);
       }

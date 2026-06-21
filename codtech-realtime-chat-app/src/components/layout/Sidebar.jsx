@@ -20,14 +20,40 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   const { roomId: currentRoomId } = useParams();
   const { currentUser } = useAuth();
   const menuRef = useRef(null);
+  const prevRoomsRef = useRef({});
+
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
 
   useEffect(() => {
     const q = query(collection(db, "rooms"), orderBy("createdAt", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedRooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setAllRooms(fetchedRooms);
-      
       const myRooms = fetchedRooms.filter(r => r.members && r.members.includes(currentUser.uid));
+      
+      myRooms.forEach(room => {
+        const oldRoom = prevRoomsRef.current[room.id];
+        if (oldRoom && room.lastMessage) {
+          const newTime = room.lastMessage.createdAt?.toMillis() || 0;
+          const oldTime = oldRoom.lastMessage?.createdAt?.toMillis() || 0;
+          if (newTime > oldTime && room.lastMessage.senderUid !== currentUser.uid) {
+            // New message!
+            if (currentRoomId !== room.id || document.hidden) {
+              if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(`New message in #${room.name}`, {
+                  body: `${room.lastMessage.senderName}: ${room.lastMessage.text}`
+                });
+              }
+            }
+          }
+        }
+        prevRoomsRef.current[room.id] = room;
+      });
+
+      setAllRooms(fetchedRooms);
       setRooms(myRooms);
       
       if (myRooms.length > 0 && !currentRoomId) {
@@ -239,24 +265,33 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
         </AnimatePresence>
 
         <div className="space-y-0.5">
-          {rooms.map(room => (
-            <button
-              key={room.id}
-              onClick={() => {
-                navigate(`/chat/${room.id}`);
-                setIsMobileOpen(false);
-              }}
-              onContextMenu={(e) => handleContextMenu(e, room)}
-              className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all text-sm font-semibold group ${
-                currentRoomId === room.id 
-                  ? "bg-indigo-500/10 text-indigo-400" 
-                  : "hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <Hash className="w-4 h-4 mr-3 opacity-50 shrink-0 group-hover:opacity-100 transition-opacity" />
-              <span className="truncate tracking-tight">{room.name}</span>
-            </button>
-          ))}
+          {rooms.map(room => {
+            const msgTime = room.lastMessage?.createdAt?.toMillis ? room.lastMessage.createdAt.toMillis() : Date.now();
+            const readTime = room.lastReadAt?.[currentUser.uid]?.toMillis ? room.lastReadAt[currentUser.uid].toMillis() : 0;
+            const hasUnread = currentRoomId !== room.id && room.lastMessage && msgTime > readTime;
+            
+            return (
+              <button
+                key={room.id}
+                onClick={() => {
+                  navigate(`/chat/${room.id}`);
+                  setIsMobileOpen(false);
+                }}
+                onContextMenu={(e) => handleContextMenu(e, room)}
+                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all text-sm font-semibold group relative ${
+                  currentRoomId === room.id 
+                    ? "bg-indigo-500/10 text-indigo-400" 
+                    : "hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                <Hash className={`w-4 h-4 mr-3 shrink-0 transition-opacity ${hasUnread ? 'opacity-100 text-indigo-400' : 'opacity-50 group-hover:opacity-100'}`} />
+                <span className={`truncate tracking-tight ${hasUnread ? 'text-white' : ''}`}>{room.name}</span>
+                {hasUnread && (
+                  <div className="absolute right-3 w-2 h-2 rounded-full bg-indigo-500"></div>
+                )}
+              </button>
+            );
+          })}
           {rooms.length === 0 && !isCreating && !isJoining && (
             <div className="text-xs text-zinc-500 px-2 mt-6 text-center font-medium bg-zinc-950 py-4 rounded-xl border border-zinc-800/50">
               You are not in any rooms. Join or create one!

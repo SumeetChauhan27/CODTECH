@@ -5,7 +5,7 @@ import MessageInput from "../components/chat/MessageInput";
 import { LogOut, Menu, Key, ShieldCheck, X, Pin, Search } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useParams } from "react-router-dom";
-import { doc, onSnapshot, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, arrayRemove, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { ref, onValue } from "firebase/database";
 import { db, rtdb } from "../services/firebase";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,6 +50,14 @@ export default function ChatPage() {
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [currentRoomId, roomData, currentUser.uid]);
+
+  useEffect(() => {
+    if (currentRoomId && roomData?.members?.includes(currentUser.uid)) {
+      updateDoc(doc(db, "rooms", currentRoomId), {
+        [`lastReadAt.${currentUser.uid}`]: serverTimestamp()
+      }).catch(console.error);
+    }
+  }, [currentRoomId, roomData?.lastMessage?.createdAt, currentUser.uid]);
 
   useEffect(() => {
     if (!currentRoomId) {
