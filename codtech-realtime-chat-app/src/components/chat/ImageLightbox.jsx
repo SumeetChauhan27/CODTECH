@@ -35,14 +35,14 @@ export default function ImageLightbox({ imageURL, onClose }) {
         <div className="absolute top-4 right-4 flex items-center gap-4">
           <button 
             onClick={(e) => { e.stopPropagation(); handleDownload(); }}
-            className="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+            className="p-3 text-white/70 hover:text-white hover:var-bg-primary/10 rounded-full transition-colors"
             title="Download"
           >
             <Download className="w-6 h-6" />
           </button>
           <button 
             onClick={onClose}
-            className="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+            className="p-3 text-white/70 hover:text-white hover:var-bg-primary/10 rounded-full transition-colors"
             title="Close"
           >
             <X className="w-7 h-7" />

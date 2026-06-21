@@ -1,8 +1,65 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --neo-bg: #e8edf2;
+    --neo-text: #333333;
+    --neo-text-muted: #6b7280;
+    --neo-shadow-light: #ffffff;
+    --neo-shadow-dark: #cdd3da;
+    --neo-border: rgba(255, 255, 255, 0.5);
+  }
+
+  .dark {
+    --neo-bg: #1a1b1e;
+    --neo-text: #e5e7eb;
+    --neo-text-muted: #9ca3af;
+    --neo-shadow-light: #25262a;
+    --neo-shadow-dark: #0f1012;
+    --neo-border: rgba(255, 255, 255, 0.05);
+  }
+
   body {
-    background-color: #f8fafc;
-    color: #111827;
+    background-color: var(--neo-bg);
+    color: var(--neo-text);
+    font-family: 'Inter', system-ui, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+  }
+}
+
+@layer utilities {
+  .var-text-primary { color: var(--neo-text); }
+  .var-text-secondary { color: var(--neo-text-muted); }
+  .var-text-muted { color: var(--neo-text-muted); opacity: 0.7; }
+  .var-bg-primary { background-color: var(--neo-bg); }
+  .var-bg-secondary { background-color: var(--neo-bg); }
+  .var-border-color { border-color: var(--neo-border); }
+
+  .neo-bg {
+    background-color: var(--neo-bg);
+  }
+  .neo-shadow {
+    box-shadow: 8px 8px 16px var(--neo-shadow-dark), -8px -8px 16px var(--neo-shadow-light);
+  }
+  .neo-shadow-sm {
+    box-shadow: 4px 4px 8px var(--neo-shadow-dark), -4px -4px 8px var(--neo-shadow-light);
+  }
+  .neo-pressed {
+    box-shadow: inset 6px 6px 12px var(--neo-shadow-dark), inset -6px -6px 12px var(--neo-shadow-light);
+  }
+  .neo-blue {
+    background: linear-gradient(135deg, #1e90ff, #007aff);
+    box-shadow: 0 8px 20px rgba(0, 122, 255, 0.35);
+    color: white;
+  }
+  .neo-red-badge {
+    background: linear-gradient(135deg, #ff4d4d, #ff3b30);
+    box-shadow: 0 4px 12px rgba(255, 59, 48, 0.45);
+    color: white;
+  }
+  .neo-blue-badge {
+    background: linear-gradient(135deg, #1e90ff, #007aff);
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.45);
+    color: white;
   }
 }

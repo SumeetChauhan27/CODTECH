@@ -70,17 +70,17 @@ export default function PinnedMessageBanner({ roomData, onMessageClick }) {
   return (
     <div 
       onClick={handleBannerClick}
-      className="bg-white/95 backdrop-blur-md border-b border-zinc-200/60 px-4 py-2 flex items-center justify-between gap-3 cursor-pointer hover:bg-zinc-50 transition-colors z-10 shrink-0 shadow-sm"
+      className="var-bg-primary/95 backdrop-blur-md border-b var-border-color/60 px-4 py-2 flex items-center justify-between gap-3 cursor-pointer hover:var-bg-secondary transition-colors z-10 shrink-0 shadow-sm"
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center shrink-0">
-          <Pin className="w-4 h-4 text-orange-500" />
+        <div className="w-8 h-8 bg-indigo-500/10 rounded-lg flex items-center justify-center shrink-0">
+          <Pin className="w-4 h-4 text-indigo-500" />
         </div>
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <span className="text-[11px] font-bold text-orange-600 uppercase tracking-wide leading-none mb-1">
+          <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wide leading-none mb-1">
             Pinned Message {pinnedMsgs.length > 1 ? `(${currentIndex + 1}/${pinnedMsgs.length})` : ""}
           </span>
-          <span className="text-[13px] text-zinc-700 truncate leading-none font-medium">
+          <span className="text-[13px] var-text-primary truncate leading-none font-medium">
             {currentMsg.text || (currentMsg.imageURL ? "📷 Photo" : "File attachment")}
           </span>
         </div>
@@ -93,7 +93,7 @@ export default function PinnedMessageBanner({ roomData, onMessageClick }) {
               <div 
                 key={i} 
                 className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                  i === currentIndex ? "bg-orange-500" : "bg-orange-200"
+                  i === currentIndex ? "bg-indigo-500" : "bg-indigo-500/20"
                 }`}
               />
             ))}
@@ -102,7 +102,7 @@ export default function PinnedMessageBanner({ roomData, onMessageClick }) {
         {isCreatorOrAdmin && (
           <button 
             onClick={handleUnpin}
-            className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1.5 var-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Unpin"
           >
             <X className="w-4 h-4" />

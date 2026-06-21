@@ -1,7 +1,4 @@
 import { useState, useEffect } from "react";
-import Sidebar from "../components/layout/Sidebar";
-import MessageList from "../components/chat/MessageList";
-import MessageInput from "../components/chat/MessageInput";
 import { LogOut, Menu, Key, ShieldCheck, X, Pin, Search, Settings } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useParams } from "react-router-dom";
@@ -9,9 +6,13 @@ import { doc, onSnapshot, updateDoc, arrayRemove, arrayUnion, serverTimestamp } 
 import { ref, onValue } from "firebase/database";
 import { db, rtdb } from "../services/firebase";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
+import MessageList from "../components/chat/MessageList";
+import MessageInput from "../components/chat/MessageInput";
+import Sidebar from "../components/layout/Sidebar";
 import ProfileEditModal from "../components/profile/ProfileEditModal";
-import PinnedMessageBanner from "../components/chat/PinnedMessageBanner";
 import MessageSearchModal from "../components/chat/MessageSearchModal";
+import PinnedMessageBanner from "../components/chat/PinnedMessageBanner";
 import RoomSettingsModal from "../components/chat/RoomSettingsModal";
 
 export default function ChatPage() {
@@ -80,6 +81,7 @@ export default function ChatPage() {
     if (!roomData?.inviteCode) return;
     navigator.clipboard.writeText(roomData.inviteCode);
     setCopied(true);
+    toast.success("Invite code copied!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -109,7 +111,7 @@ export default function ChatPage() {
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       el.style.transition = "background-color 0.5s ease";
-      el.style.backgroundColor = "rgba(254, 215, 170, 0.4)"; // orange-200/40
+      el.style.backgroundColor = "rgba(99, 102, 241, 0.25)"; // indigo-500/25
       el.style.borderRadius = "0.75rem";
       setTimeout(() => {
         el.style.backgroundColor = "transparent";
@@ -129,19 +131,19 @@ export default function ChatPage() {
   const hasPendingRequest = roomData?.pendingRequests?.some(r => r.uid === currentUser.uid);
 
   return (
-    <div className="flex h-screen max-h-[100dvh] bg-zinc-50 overflow-hidden relative">
+    <div className="flex h-screen max-h-[100dvh] neo-bg overflow-hidden relative">
       <Sidebar 
         isMobileOpen={isMobileOpen}
         setIsMobileOpen={setIsMobileOpen}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 bg-white relative z-10 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)]">
+      <div className="flex-1 flex flex-col min-w-0 neo-bg relative z-10">
         {/* Navbar */}
-        <div className="h-[72px] bg-white/80 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 border-b border-zinc-200/60 z-20 transition-all">
+        <div className="h-[80px] neo-bg flex items-center justify-between px-6 shrink-0 z-20 transition-all rounded-bl-3xl neo-shadow mb-4 ml-4 mt-4 mr-4">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsMobileOpen(!isMobileOpen)}
-              className="md:hidden p-2 text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
+              className="md:hidden p-2 var-text-secondary hover:text-blue-500 rounded-xl transition-colors neo-shadow-sm active:neo-pressed"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -154,10 +156,10 @@ export default function ChatPage() {
                 )}
               </div>
               <div>
-                <h2 className="font-bold text-[17px] text-zinc-900 leading-tight tracking-tight">
+                <h2 className="font-bold text-[17px] var-text-primary leading-tight tracking-tight">
                   {roomData ? roomData.name : "Select a Chat"}
                 </h2>
-                <span className="text-xs text-zinc-500 font-medium">
+                <span className="text-xs var-text-secondary font-medium">
                   {isCreator && roomData?.pendingRequests?.length > 0 ? (
                     <button onClick={() => setShowRequestsModal(true)} className="text-orange-500 hover:text-orange-600 transition-colors">
                       {roomData.pendingRequests.length} pending request(s)
@@ -170,37 +172,35 @@ export default function ChatPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-3">
             {roomData?.inviteCode && isMember && (
               <button
                 onClick={handleCopyCode}
-                className="flex items-center gap-2 mr-3 px-4 py-2 bg-zinc-100/80 text-zinc-700 hover:bg-zinc-200/80 rounded-xl transition-all text-sm font-semibold active:scale-95"
+                className="flex items-center gap-2 mr-1 px-4 py-2 neo-bg neo-shadow-sm var-text-secondary hover:text-blue-500 rounded-xl transition-all text-sm font-bold active:neo-pressed border-none"
                 title="Copy 10-digit Invite Code"
               >
-                <Key className="w-4 h-4 text-zinc-500" />
+                <Key className="w-4 h-4" />
                 <span className="hidden sm:inline">
                   {copied ? "Copied!" : `Code: ${roomData.inviteCode}`}
                 </span>
               </button>
             )}
-
-            {isMember && (
-              <button
-                onClick={() => setShowSearchModal(true)}
-                className="p-2.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all group active:scale-95 flex items-center gap-2"
-                title="Search Messages"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-            )}
-
+            
+            <button 
+              onClick={() => setShowSearchModal(true)}
+              className="p-2.5 neo-bg var-text-secondary hover:text-blue-500 neo-shadow-sm active:neo-pressed rounded-xl transition-all border-none"
+              title="Search Messages (Ctrl+K)"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+            
             {isMember && (
               <button
                 onClick={() => setShowSettingsModal(true)}
-                className="p-2.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all group active:scale-95 flex items-center gap-2"
+                className="p-2.5 neo-bg var-text-secondary hover:text-blue-500 neo-shadow-sm active:neo-pressed rounded-xl transition-all border-none"
                 title="Room Settings"
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="w-4 h-4" />
               </button>
             )}
 
@@ -208,17 +208,17 @@ export default function ChatPage() {
 
             <button
               onClick={() => setShowProfileEdit(true)}
-              className="hidden sm:flex flex-col items-end mr-1 px-2 py-1 hover:bg-zinc-100 rounded-lg transition-colors text-right"
+              className="hidden sm:flex flex-col items-end mr-1 px-3 py-1.5 neo-shadow-sm hover:text-blue-500 rounded-xl transition-colors text-right active:neo-pressed border-none"
             >
-              <span className="text-sm font-bold text-zinc-800 leading-tight">
+              <span className="text-sm font-bold var-text-primary leading-tight">
                 {currentUser?.displayName || currentUser?.email.split('@')[0]}
               </span>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <div className={`w-1.5 h-1.5 rounded-full ${
                   myPresence === "online" ? "bg-emerald-500" : 
-                  myPresence === "away" ? "bg-amber-500" : "bg-zinc-500"
+                  myPresence === "away" ? "bg-amber-500" : "var-bg-secondary0"
                 }`} />
-                <span className="text-[11px] font-medium text-zinc-500 group-hover:text-indigo-500 transition-colors">
+                <span className="text-[11px] font-medium var-text-secondary group-hover:text-indigo-500 transition-colors">
                   {myPresence === "online" ? "Online" : myPresence === "away" ? "Idle" : "Offline"} · Edit Profile
                 </span>
               </div>
@@ -226,10 +226,10 @@ export default function ChatPage() {
 
             <button
               onClick={logout}
-              className="p-2.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all group active:scale-95"
+              className="p-2.5 var-text-secondary hover:text-red-500 neo-shadow-sm active:neo-pressed rounded-xl transition-all border-none"
               title="Sign Out"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function ChatPage() {
         </AnimatePresence>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col min-h-0 relative bg-zinc-50">
+        <div className="flex-1 flex flex-col min-h-0 relative var-bg-secondary">
           {/* Overlay to close sidebar on mobile */}
           {isMobileOpen && (
             <div 
@@ -270,7 +270,7 @@ export default function ChatPage() {
 
           {!currentRoomId ? (
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-zinc-400 font-medium bg-white px-6 py-3 rounded-2xl shadow-sm border border-zinc-100">Select a room from the sidebar</p>
+              <p className="var-text-muted font-medium var-bg-primary px-6 py-3 rounded-2xl shadow-sm border var-border-color">Select a room from the sidebar</p>
             </div>
           ) : !roomData ? (
             <div className="flex-1 flex items-center justify-center">
@@ -285,19 +285,19 @@ export default function ChatPage() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 bg-zinc-50">
-              <div className="max-w-sm w-full bg-white p-8 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-zinc-100 text-center">
+            <div className="flex-1 flex flex-col items-center justify-center p-6 var-bg-secondary">
+              <div className="max-w-sm w-full var-bg-primary p-8 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border var-border-color text-center">
                 <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <ShieldCheck className="w-8 h-8 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold text-zinc-900 mb-3 tracking-tight">Private Room</h3>
+                <h3 className="text-xl font-bold var-text-primary mb-3 tracking-tight">Private Room</h3>
                 
                 {hasPendingRequest ? (
-                  <p className="text-zinc-500 text-sm leading-relaxed">
-                    Your request to join <strong className="text-zinc-800">{roomData.name}</strong> has been sent. Please wait for the room creator to approve you.
+                  <p className="var-text-secondary text-sm leading-relaxed">
+                    Your request to join <strong className="var-text-primary">{roomData.name}</strong> has been sent. Please wait for the room creator to approve you.
                   </p>
                 ) : (
-                  <p className="text-zinc-500 text-sm leading-relaxed">
+                  <p className="var-text-secondary text-sm leading-relaxed">
                     You need to use the 10-digit invite code in the sidebar to request access to this room.
                   </p>
                 )}
@@ -320,11 +320,11 @@ export default function ChatPage() {
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden border border-zinc-100"
+              className="var-bg-primary rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden border var-border-color"
             >
-              <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-100 bg-white">
-                <h3 className="font-bold text-lg text-zinc-900 tracking-tight">Join Requests</h3>
-                <button onClick={() => setShowRequestsModal(false)} className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors">
+              <div className="flex items-center justify-between px-6 py-5 border-b var-border-color var-bg-primary">
+                <h3 className="font-bold text-lg var-text-primary tracking-tight">Join Requests</h3>
+                <button onClick={() => setShowRequestsModal(false)} className="p-2 var-text-muted hover:var-text-primary hover:var-bg-secondary rounded-xl transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -333,11 +333,11 @@ export default function ChatPage() {
                 {roomData.pendingRequests?.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <div className="text-4xl mb-3">👻</div>
-                    <p className="text-zinc-500 font-medium">No pending requests.</p>
+                    <p className="var-text-secondary font-medium">No pending requests.</p>
                   </div>
                 ) : (
                   roomData.pendingRequests?.map((req, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 mb-2 hover:bg-zinc-50 rounded-2xl transition-colors border border-transparent hover:border-zinc-100">
+                    <div key={i} className="flex items-center justify-between p-3 mb-2 hover:var-bg-secondary rounded-2xl transition-colors border border-transparent hover:var-border-color">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center">
                           <span className="text-indigo-600 font-bold text-sm">
@@ -345,8 +345,8 @@ export default function ChatPage() {
                           </span>
                         </div>
                         <div>
-                          <p className="font-semibold text-zinc-900 text-[15px]">{req.displayName}</p>
-                          <p className="text-xs text-zinc-500 font-medium">ID: {req.uid.substring(0,8)}</p>
+                          <p className="font-semibold var-text-primary text-[15px]">{req.displayName}</p>
+                          <p className="text-xs var-text-secondary font-medium">ID: {req.uid.substring(0,8)}</p>
                         </div>
                       </div>
                       <div className="flex gap-2">

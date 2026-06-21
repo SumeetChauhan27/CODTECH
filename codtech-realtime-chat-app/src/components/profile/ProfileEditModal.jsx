@@ -90,17 +90,17 @@ export default function ProfileEditModal({ onClose }) {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 w-full max-w-sm relative shadow-2xl"
+        className="neo-bg neo-shadow-sm border border-white/50 rounded-3xl p-6 w-full max-w-sm relative overflow-hidden"
       >
         <button
           onClick={onClose}
           disabled={saving}
-          className="absolute top-4 right-4 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10 disabled:opacity-50"
+          className="absolute top-4 right-4 p-2 var-text-muted hover:var-text-primary rounded-xl transition-colors z-10 disabled:opacity-50 neo-bg active:neo-pressed"
         >
           <X size={20} />
         </button>
 
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+        <h2 className="text-xl font-bold var-text-primary mb-6 flex items-center">
           <User size={20} className="mr-2" /> Edit Profile
         </h2>
 
@@ -125,61 +125,70 @@ export default function ProfileEditModal({ onClose }) {
             {success && <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-sm">{success}</div>}
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-white/60 uppercase tracking-wider ml-1">Display Name</label>
+              <label className="text-xs font-medium var-text-secondary uppercase tracking-wider ml-1">Display Name</label>
               <div className="relative">
-                <Type size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                <Type size={16} className="absolute left-3 top-1/2 -translate-y-1/2 var-text-muted" />
                 <input
                   type="text"
                   name="displayName"
                   value={formData.displayName}
                   onChange={handleChange}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full neo-pressed border-none rounded-xl py-3 pl-10 pr-4 var-text-primary placeholder:var-text-muted focus:outline-none"
                   placeholder="Your name"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-white/60 uppercase tracking-wider ml-1">Username</label>
+              <label className="text-xs font-medium var-text-secondary uppercase tracking-wider ml-1">Username</label>
               <div className="relative">
-                <AtSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                <AtSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 var-text-muted" />
                 <input
                   type="text"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full neo-pressed border-none rounded-xl py-3 pl-10 pr-4 var-text-primary placeholder:var-text-muted focus:outline-none"
                   placeholder="username"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-white/60 uppercase tracking-wider ml-1">Bio</label>
+              <label className="text-xs font-medium var-text-secondary uppercase tracking-wider ml-1">Bio</label>
               <div className="relative">
-                <FileText size={16} className="absolute left-3 top-3 text-white/40" />
+                <FileText size={16} className="absolute left-3 top-3 var-text-muted" />
                 <textarea
                   name="bio"
                   value={formData.bio}
                   onChange={handleChange}
                   rows={3}
                   maxLength={160}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
+                  className="w-full neo-pressed border-none rounded-xl py-2 pl-10 pr-4 var-text-primary placeholder:var-text-muted focus:outline-none resize-none"
                   placeholder="Tell us about yourself..."
                 />
               </div>
-              <div className="text-right text-xs text-white/40 pr-1">
+              <div className="text-right text-xs var-text-muted pr-1">
                 {formData.bio.length}/160
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/25 transition-all flex justify-center items-center disabled:opacity-50"
-            >
-              {saving ? <Loader2 size={18} className="animate-spin" /> : <><Save size={18} className="mr-2" /> Save Profile</>}
-            </button>
+            <div className="pt-4 flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-3 rounded-xl neo-bg neo-shadow-sm font-medium var-text-primary hover:text-blue-500 active:neo-pressed transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex-1 py-3 rounded-xl neo-blue font-medium text-white shadow-lg active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {saving ? <Loader2 size={18} className="animate-spin" /> : 'Save Changes'}
+              </button>
+            </div>
           </form>
         )}
       </motion.div>

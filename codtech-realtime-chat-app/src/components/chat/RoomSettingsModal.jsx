@@ -101,31 +101,31 @@ export default function RoomSettingsModal({ roomData, onClose }) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="var-bg-primary rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
       >
-        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between shrink-0 bg-zinc-50/50">
+        <div className="px-6 py-4 border-b var-border-color flex items-center justify-between shrink-0 var-bg-secondary/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
               <Settings className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-900 tracking-tight">Room Settings</h2>
-              <p className="text-xs text-zinc-500 font-medium">#{roomData.name}</p>
+              <h2 className="text-lg font-bold var-text-primary tracking-tight">Room Settings</h2>
+              <p className="text-xs var-text-secondary font-medium">#{roomData.name}</p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-full transition-colors"
+            className="p-2 var-text-muted hover:var-text-secondary hover:var-bg-secondary rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex border-b border-zinc-100 shrink-0 px-4">
+        <div className="flex border-b var-border-color shrink-0 px-4">
           <button
             onClick={() => setActiveTab("general")}
             className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
-              activeTab === "general" ? "border-indigo-500 text-indigo-600" : "border-transparent text-zinc-500 hover:text-zinc-800"
+              activeTab === "general" ? "border-indigo-500 text-indigo-600" : "border-transparent var-text-secondary hover:var-text-primary"
             }`}
           >
             General
@@ -133,7 +133,7 @@ export default function RoomSettingsModal({ roomData, onClose }) {
           <button
             onClick={() => setActiveTab("members")}
             className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
-              activeTab === "members" ? "border-indigo-500 text-indigo-600" : "border-transparent text-zinc-500 hover:text-zinc-800"
+              activeTab === "members" ? "border-indigo-500 text-indigo-600" : "border-transparent var-text-secondary hover:var-text-primary"
             }`}
           >
             Members ({roomData?.members?.length || 0})
@@ -151,7 +151,7 @@ export default function RoomSettingsModal({ roomData, onClose }) {
                     value={roomName}
                     onChange={(e) => setRoomName(e.target.value)}
                     disabled={!isAdmin}
-                    className="flex-1 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-sm text-zinc-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all disabled:opacity-60"
+                    className="flex-1 var-bg-secondary border var-border-color rounded-xl px-4 py-2.5 text-sm var-text-primary focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all disabled:opacity-60"
                   />
                   {isAdmin && (
                     <button
@@ -167,11 +167,11 @@ export default function RoomSettingsModal({ roomData, onClose }) {
               
               <div>
                 <label className="block text-sm font-bold text-zinc-700 mb-2">Invite Code</label>
-                <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3 var-bg-secondary border var-border-color rounded-xl px-4 py-3">
                   <Key className="w-5 h-5 text-indigo-500" />
-                  <span className="text-lg font-mono font-bold tracking-widest text-zinc-800">{roomData.inviteCode}</span>
+                  <span className="text-lg font-mono font-bold tracking-widest var-text-primary">{roomData.inviteCode}</span>
                 </div>
-                <p className="text-xs text-zinc-500 mt-2 font-medium">Share this 10-digit code with others so they can request to join.</p>
+                <p className="text-xs var-text-secondary mt-2 font-medium">Share this 10-digit code with others so they can request to join.</p>
               </div>
             </div>
           )}
@@ -179,7 +179,7 @@ export default function RoomSettingsModal({ roomData, onClose }) {
           {activeTab === "members" && (
             <div className="space-y-3">
               {loading ? (
-                <div className="text-center py-8 text-sm text-zinc-500 font-medium">Loading members...</div>
+                <div className="text-center py-8 text-sm var-text-secondary font-medium">Loading members...</div>
               ) : (
                 membersInfo.map(member => {
                   const isMemCreator = member.uid === roomData.createdBy;
@@ -187,23 +187,23 @@ export default function RoomSettingsModal({ roomData, onClose }) {
                   const isMe = member.uid === currentUser.uid;
 
                   return (
-                    <div key={member.uid} className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 hover:border-zinc-200 bg-white hover:bg-zinc-50 transition-colors">
+                    <div key={member.uid} className="flex items-center justify-between p-3 rounded-xl border var-border-color hover:var-border-color var-bg-primary hover:var-bg-secondary transition-colors">
                       <div className="flex items-center gap-3">
                         <img 
                           src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.displayName)}`} 
                           alt={member.displayName}
-                          className="w-10 h-10 rounded-full border border-zinc-200"
+                          className="w-10 h-10 rounded-full border var-border-color"
                         />
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-zinc-900 text-sm">
+                            <span className="font-bold var-text-primary text-sm">
                               {member.displayName}
-                              {isMe && <span className="ml-1 text-zinc-400 font-normal">(You)</span>}
+                              {isMe && <span className="ml-1 var-text-muted font-normal">(You)</span>}
                             </span>
                             {isMemCreator && <Crown className="w-3.5 h-3.5 text-amber-500" title="Creator" />}
                             {!isMemCreator && isMemAdmin && <Shield className="w-3.5 h-3.5 text-indigo-500" title="Admin" />}
                           </div>
-                          <span className="text-xs text-zinc-500">
+                          <span className="text-xs var-text-secondary">
                             {isMemCreator ? "Room Creator" : isMemAdmin ? "Admin" : "Member"}
                           </span>
                         </div>
@@ -218,7 +218,7 @@ export default function RoomSettingsModal({ roomData, onClose }) {
                                 className={`p-2 rounded-lg transition-colors ${
                                   isMemAdmin 
                                     ? "text-indigo-600 bg-indigo-50 hover:bg-indigo-100" 
-                                    : "text-zinc-400 hover:text-indigo-600 hover:bg-zinc-100"
+                                    : "var-text-muted hover:text-indigo-600 hover:var-bg-secondary"
                                 }`}
                                 title={isMemAdmin ? "Remove Admin" : "Make Admin"}
                               >
@@ -226,7 +226,7 @@ export default function RoomSettingsModal({ roomData, onClose }) {
                               </button>
                               <button
                                 onClick={() => handleTransferOwnership(member.uid)}
-                                className="p-2 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                className="p-2 var-text-muted hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                                 title="Transfer Ownership"
                               >
                                 <Crown className="w-4 h-4" />
@@ -236,7 +236,7 @@ export default function RoomSettingsModal({ roomData, onClose }) {
                           {(!isMemAdmin || isCreator) && (
                             <button
                               onClick={() => handleKick(member.uid)}
-                              className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-2 var-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               title="Kick Member"
                             >
                               <UserX className="w-4 h-4" />

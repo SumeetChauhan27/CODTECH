@@ -128,7 +128,7 @@ export default function MessageInput({ roomData, editingMessage, setEditingMessa
       {showEmojiPicker && (
         <div 
           ref={pickerRef}
-          className="absolute bottom-full right-4 mb-2 shadow-2xl rounded-2xl overflow-hidden border border-zinc-100 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
+          className="absolute bottom-full right-4 mb-2 shadow-2xl rounded-2xl overflow-hidden border var-border-color z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
         >
           <EmojiPicker 
             onEmojiClick={(e) => {
@@ -147,7 +147,7 @@ export default function MessageInput({ roomData, editingMessage, setEditingMessa
         <div className="flex items-center justify-between px-6 py-2 bg-indigo-50 border-t border-indigo-100 relative z-20 shadow-inner">
           <div className="flex items-center gap-3">
             <span className="text-indigo-600 font-bold text-sm tracking-tight">Editing message</span>
-            <span className="text-zinc-500 text-sm truncate max-w-[200px] sm:max-w-[400px]">{editingMessage.text}</span>
+            <span className="var-text-secondary text-sm truncate max-w-[200px] sm:max-w-[400px]">{editingMessage.text}</span>
           </div>
           <button 
             onClick={() => {
@@ -163,7 +163,7 @@ export default function MessageInput({ roomData, editingMessage, setEditingMessa
 
       <form 
         onSubmit={handleSend} 
-        className={`px-4 py-3 bg-white/80 backdrop-blur-xl shrink-0 relative z-20 ${!editingMessage && 'border-t border-zinc-200/60'}`}
+        className={`px-4 py-3 neo-bg shrink-0 relative z-20 border-t border-white/50`}
       >
         {isUploading && progress > 0 && (
           <div className="absolute top-0 left-0 right-0 h-1 bg-blue-100 rounded-t-xl overflow-hidden">
@@ -174,14 +174,14 @@ export default function MessageInput({ roomData, editingMessage, setEditingMessa
           </div>
         )}
 
-        <div className="flex items-end gap-3">
-          <div className="flex-1 bg-zinc-100/80 rounded-2xl flex items-end px-4 py-2 border border-zinc-200/50 transition-colors focus-within:bg-white focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/10">
+        <div className="flex items-end gap-3 max-w-4xl mx-auto relative neo-bg neo-shadow-sm rounded-3xl p-2 pl-4">
+          <div className="flex-1 flex items-end px-1 py-1">
             <button
               type="button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="p-1.5 text-zinc-400 hover:text-blue-500 transition-colors shrink-0 mb-0.5 -ml-1"
+              className={`p-2 rounded-xl transition-all ${showEmojiPicker ? 'neo-pressed text-blue-500' : 'var-text-muted hover:text-blue-500 hover:neo-shadow-sm active:scale-95 shrink-0 mb-0.5'}`}
             >
-              <Smile className="w-6 h-6" />
+              <Smile className="w-5 h-5" />
             </button>
 
             {!editingMessage && (
@@ -201,17 +201,17 @@ export default function MessageInput({ roomData, editingMessage, setEditingMessa
               onKeyDown={handleKeyDown}
               placeholder={editingMessage ? "Edit message..." : "Type a message..."}
               rows={text.split("\n").length > 3 ? 3 : text.split("\n").length}
-              className="w-full max-h-32 bg-transparent focus:outline-none resize-none text-[15px] py-1.5 scrollbar-thin ml-2 text-zinc-800 placeholder:text-zinc-400"
+              className="w-full max-h-32 bg-transparent focus:outline-none resize-none text-[15px] py-2 custom-scrollbar ml-3 var-text-primary placeholder:var-text-muted leading-relaxed"
             />
           </div>
           
           <button
             type="submit"
             disabled={(!text.trim() && !selectedFile) || isUploading || isSending}
-            className={`w-11 h-11 flex items-center justify-center text-white rounded-full transition-all hover:scale-105 active:scale-95 shrink-0 shadow-md ${
-              editingMessage 
-                ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 disabled:bg-indigo-400" 
-                : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20 disabled:bg-blue-400"
+            className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all hover:scale-105 active:scale-95 shrink-0 border-none ${
+              (!text.trim() && !selectedFile) || isUploading || isSending 
+                ? "bg-zinc-200 var-text-muted cursor-not-allowed" 
+                : "neo-blue"
             }`}
           >
             {editingMessage ? <Check className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}

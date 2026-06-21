@@ -4,6 +4,7 @@ import { db } from "../../services/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 import { Check, CheckCheck, Info, X, Trash2, Pin, Star, Copy, FileText, Pencil } from "lucide-react";
 import ProfileViewModal from "../profile/ProfileViewModal";
 import ImageLightbox from "./ImageLightbox";
@@ -106,6 +107,12 @@ export default function MessageList({ roomData, setEditingMessage }) {
     }
   };
 
+  const handleCopyText = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Text copied to clipboard!");
+    setContextMenu(null);
+  };
+
   const handleContextMenu = (e, msg) => {
     e.preventDefault();
     setContextMenu({
@@ -170,7 +177,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
               key={emoji} 
               className={`
                 text-[11px] px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 cursor-default ring-1 ring-black/5
-                ${userUids.includes(currentUser.uid) ? 'bg-blue-50 text-blue-700' : 'bg-white text-zinc-600'}
+                ${userUids.includes(currentUser.uid) ? 'bg-blue-50 text-blue-700' : 'var-bg-primary var-text-secondary'}
               `}
             >
               {emoji} <span className="font-semibold">{userUids.length > 1 ? userUids.length : ''}</span>
@@ -183,17 +190,17 @@ export default function MessageList({ roomData, setEditingMessage }) {
 
   if (!roomData?.id) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-zinc-50">
-        <p className="text-zinc-400 font-medium">Select or create a channel to start chatting</p>
+      <div className="flex-1 flex items-center justify-center var-bg-secondary">
+        <p className="var-text-muted font-medium">Select or create a channel to start chatting</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-zinc-50 gap-4">
+      <div className="flex-1 flex flex-col items-center justify-center var-bg-secondary gap-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-        <p className="text-sm text-zinc-500 font-medium">Loading messages...</p>
+        <p className="text-sm var-text-secondary font-medium">Loading messages...</p>
       </div>
     );
   }
@@ -201,7 +208,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
   const membersCount = roomData.members?.length || 1;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-7 bg-zinc-50 scroll-smooth relative">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-7 neo-bg scroll-smooth relative custom-scrollbar">
       {messages.length === 0 && (
         <div className="flex items-center justify-center h-full">
           <motion.div 
@@ -210,8 +217,8 @@ export default function MessageList({ roomData, setEditingMessage }) {
             className="text-center space-y-2"
           >
             <div className="text-4xl mb-4">✨</div>
-            <p className="text-zinc-800 font-medium text-lg">It's quiet in here.</p>
-            <p className="text-zinc-500 text-sm">Send a message to kick off the conversation!</p>
+            <p className="var-text-primary font-medium text-lg">It's quiet in here.</p>
+            <p className="var-text-secondary text-sm">Send a message to kick off the conversation!</p>
           </motion.div>
         </div>
       )}
@@ -240,7 +247,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
             {/* Context Indicators (Pinned/Starred) */}
             {(isPinnedActive || isStarred) && (
               <div className={`flex items-center gap-1.5 mb-1 ${isOwn ? 'mr-3' : 'ml-3'}`}>
-                {isPinnedActive && <span className="text-[10px] font-bold text-orange-500 uppercase flex items-center gap-0.5 bg-orange-100 px-1.5 py-0.5 rounded-sm"><Pin className="w-3 h-3"/> Pinned</span>}
+                {isPinnedActive && <span className="text-[10px] font-bold text-indigo-500 uppercase flex items-center gap-0.5 bg-indigo-500/10 px-1.5 py-0.5 rounded-sm"><Pin className="w-3 h-3"/> Pinned</span>}
                 {isStarred && <span className="text-[10px] font-bold text-yellow-500 uppercase flex items-center gap-0.5 bg-yellow-50 px-1.5 py-0.5 rounded-sm"><Star className="w-3 h-3 fill-yellow-400"/> Starred</span>}
               </div>
             )}
@@ -255,7 +262,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
                   alt={msg.displayName} 
                   className="w-5 h-5 rounded-full object-cover shadow-sm group-hover/author:ring-2 ring-indigo-500/50 transition-all"
                 />
-                <span className="text-[11px] font-bold text-zinc-500 tracking-wide group-hover/author:text-indigo-500 transition-colors">
+                <span className="text-[11px] font-bold var-text-secondary tracking-wide group-hover/author:text-indigo-500 transition-colors">
                   {msg.displayName}
                 </span>
               </button>
@@ -270,7 +277,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.15 }}
-                    className={`absolute top-0 flex items-center bg-white/90 backdrop-blur-md border border-zinc-200/80 shadow-lg rounded-full px-2 py-1 z-20 ${
+                    className={`absolute top-0 flex items-center var-bg-primary/90 backdrop-blur-md border var-border-color/80 shadow-lg rounded-full px-2 py-1 z-20 ${
                       isOwn ? "right-full mr-3" : "left-full ml-3"
                     }`}
                   >
@@ -285,7 +292,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
                     ))}
                     <button 
                       onClick={() => setInfoMsg(msg)}
-                      className="ml-1 pl-1.5 border-l border-zinc-200 text-zinc-400 hover:text-indigo-500 transition-colors"
+                      className="ml-1 pl-1.5 border-l var-border-color var-text-muted hover:text-indigo-500 transition-colors"
                       title="Message Info"
                     >
                       <Info className="w-4 h-4" />
@@ -294,11 +301,11 @@ export default function MessageList({ roomData, setEditingMessage }) {
                 )}
               </AnimatePresence>
 
-              <div className={`max-w-[85vw] sm:max-w-[60vw] px-4 py-2 rounded-2xl shadow-sm relative transition-all group-hover:shadow-md cursor-context-menu ${
+              <div className={`max-w-[85vw] sm:max-w-[60vw] px-4 py-3 relative transition-all cursor-context-menu ${
                 isOwn 
-                  ? "bg-indigo-600 text-white rounded-br-sm" 
-                  : "bg-white text-zinc-900 rounded-tl-sm border border-zinc-200/60"
-              } ${isPinnedActive ? 'ring-2 ring-orange-400/50' : ''}`}>
+                  ? "neo-blue rounded-3xl rounded-br-sm" 
+                  : "neo-bg neo-shadow rounded-3xl rounded-tl-sm border-none"
+              } ${isPinnedActive ? 'ring-2 ring-indigo-500/50' : ''}`}>
                 {msg.imageURL && (
                   <div className="mb-2 -mx-2 -mt-1 rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity" onClick={(e) => { e.stopPropagation(); setSelectedImage(msg.imageURL); }}>
                     <img src={msg.imageURL} alt="Shared image" className="max-w-full max-h-64 object-cover" />
@@ -312,12 +319,12 @@ export default function MessageList({ roomData, setEditingMessage }) {
                     className="flex items-center gap-3 bg-black/5 hover:bg-black/10 transition-colors p-3 rounded-xl mb-2 -mx-1"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className={`p-2 rounded-lg ${isOwn ? 'bg-indigo-500 text-white' : 'bg-white text-indigo-500'}`}>
+                    <div className={`p-2 rounded-lg ${isOwn ? 'bg-indigo-500 text-white' : 'var-bg-primary text-indigo-500'}`}>
                       <FileText className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate">{msg.fileName || 'Attachment'}</p>
-                      <p className={`text-xs ${isOwn ? 'text-indigo-200' : 'text-zinc-500'}`}>
+                      <p className={`text-xs ${isOwn ? 'text-indigo-200' : 'var-text-secondary'}`}>
                         {msg.fileSize ? (msg.fileSize / 1024 / 1024).toFixed(2) + ' MB' : 'Download'}
                       </p>
                     </div>
@@ -334,7 +341,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
                   className="absolute bottom-1 right-2.5 flex items-center gap-1.5 cursor-pointer"
                   onClick={() => setInfoMsg(msg)}
                 >
-                  <span className={`text-[10px] font-semibold flex items-center gap-1 ${isOwn ? "text-indigo-200" : "text-zinc-400"}`}>
+                  <span className={`text-[10px] font-semibold flex items-center gap-1 ${isOwn ? "text-indigo-200" : "var-text-muted"}`}>
                     {msg.editedAt && <span className="opacity-75 italic">(edited)</span>}
                     {timeString}
                   </span>
@@ -367,44 +374,44 @@ export default function MessageList({ roomData, setEditingMessage }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.1 }}
-            className="fixed z-50 bg-white border border-zinc-200 shadow-2xl rounded-xl w-48 overflow-hidden py-1 text-sm font-medium"
+            className="fixed z-50 neo-bg neo-shadow border border-white/50 rounded-2xl w-48 overflow-hidden py-1 text-sm font-medium"
             style={{ 
               top: Math.min(contextMenu.y, window.innerHeight - 250), 
               left: Math.min(contextMenu.x, window.innerWidth - 200) 
             }}
           >
             <button 
-              className="w-full flex items-center px-4 py-2 hover:bg-zinc-50 text-zinc-700 transition-colors"
+              className="w-full flex items-center px-4 py-2 hover:var-bg-secondary text-zinc-700 transition-colors"
               onClick={() => {
                 setInfoMsg(contextMenu.msg);
                 setContextMenu(null);
               }}
             >
-              <Info className="w-4 h-4 mr-3 text-zinc-400" /> Message Info
+              <Info className="w-4 h-4 mr-3 var-text-muted" /> Message Info
             </button>
             <button 
-              className="w-full flex items-center px-4 py-2 hover:bg-zinc-50 text-zinc-700 transition-colors"
+              className="w-full flex items-center px-4 py-2 hover:var-bg-secondary text-zinc-700 transition-colors"
               onClick={() => {
                 navigator.clipboard.writeText(contextMenu.msg.text);
                 setContextMenu(null);
               }}
             >
-              <Copy className="w-4 h-4 mr-3 text-zinc-400" /> Copy Text
+              <Copy className="w-4 h-4 mr-3 var-text-muted" /> Copy Text
             </button>
             <button 
-              className="w-full flex items-center px-4 py-2 hover:bg-zinc-50 text-zinc-700 transition-colors"
+              className="w-full flex items-center px-4 py-2 hover:var-bg-secondary text-zinc-700 transition-colors"
               onClick={() => handleToggleStar(contextMenu.msg)}
             >
-              <Star className="w-4 h-4 mr-3 text-zinc-400" /> 
+              <Star className="w-4 h-4 mr-3 var-text-muted" /> 
               {contextMenu.msg.starredBy?.includes(currentUser.uid) ? "Unstar" : "Star"}
             </button>
             
             {roomData.createdBy === currentUser.uid && (
               <button 
-                className="w-full flex items-center px-4 py-2 hover:bg-orange-50 text-orange-600 transition-colors border-t border-zinc-100"
+                className="w-full flex items-center px-4 py-2 hover:bg-indigo-500/10 text-indigo-500 transition-colors border-t var-border-color"
                 onClick={() => handleTogglePin(contextMenu.msg)}
               >
-                <Pin className="w-4 h-4 mr-3 text-orange-400" /> 
+                <Pin className="w-4 h-4 mr-3 text-indigo-400" /> 
                 {(contextMenu.msg.isPinned && (!contextMenu.msg.pinnedUntil || contextMenu.msg.pinnedUntil > Date.now())) ? "Unpin for All" : "Pin for All"}
               </button>
             )}
@@ -412,7 +419,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
             {contextMenu.msg.uid === currentUser.uid && (
               <>
                 <button 
-                  className="w-full flex items-center px-4 py-2 hover:bg-indigo-50 text-indigo-600 transition-colors border-t border-zinc-100"
+                  className="w-full flex items-center px-4 py-2 hover:bg-indigo-50 text-indigo-600 transition-colors border-t var-border-color"
                   onClick={() => {
                     setEditingMessage(contextMenu.msg);
                     setContextMenu(null);
@@ -421,7 +428,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
                   <Pencil className="w-4 h-4 mr-3 text-indigo-400" /> Edit
                 </button>
                 <button 
-                  className="w-full flex items-center px-4 py-2 hover:bg-red-50 text-red-600 transition-colors border-t border-zinc-100"
+                  className="w-full flex items-center px-4 py-2 hover:bg-red-50 text-red-600 transition-colors border-t var-border-color"
                   onClick={() => handleDeleteMessage(contextMenu.msg.id)}
                 >
                   <Trash2 className="w-4 h-4 mr-3 text-red-400" /> Delete
@@ -445,46 +452,46 @@ export default function MessageList({ roomData, setEditingMessage }) {
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-[24px] shadow-2xl w-full max-w-sm overflow-hidden border border-zinc-100"
+              className="var-bg-primary rounded-[24px] shadow-2xl w-full max-w-sm overflow-hidden border var-border-color"
             >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
-                <h3 className="font-bold text-lg text-zinc-900">Message Info</h3>
-                <button onClick={() => setInfoMsg(null)} className="text-zinc-400 hover:text-zinc-900 bg-zinc-100 p-1.5 rounded-full">
+              <div className="flex items-center justify-between px-6 py-4 border-b var-border-color">
+                <h3 className="font-bold text-lg var-text-primary">Message Info</h3>
+                <button onClick={() => setInfoMsg(null)} className="var-text-muted hover:var-text-primary var-bg-secondary p-1.5 rounded-full">
                   <X className="w-4 h-4" />
                 </button>
               </div>
               
               <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
                 <div>
-                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Read by</h4>
+                  <h4 className="text-xs font-bold var-text-muted uppercase tracking-wider mb-3">Read by</h4>
                   <div className="space-y-3">
                     {infoMsg.readBy && !Array.isArray(infoMsg.readBy) ? (
                       Object.entries(infoMsg.readBy)
                         .filter(([uid]) => uid !== infoMsg.uid)
                         .map(([uid, data]) => (
                           <div key={uid} className="flex justify-between items-center text-sm">
-                            <span className="font-semibold text-zinc-800">{data.displayName}</span>
-                            <span className="text-zinc-500 text-xs font-medium bg-zinc-100 px-2 py-1 rounded-md">{format(data.time, "h:mm a")}</span>
+                            <span className="font-semibold var-text-primary">{data.displayName}</span>
+                            <span className="var-text-secondary text-xs font-medium var-bg-secondary px-2 py-1 rounded-md">{format(data.time, "h:mm a")}</span>
                           </div>
                       ))
                     ) : (
-                      <p className="text-sm text-zinc-500 italic">No detailed read history.</p>
+                      <p className="text-sm var-text-secondary italic">No detailed read history.</p>
                     )}
                   </div>
                 </div>
 
                 {infoMsg.reactions && Object.keys(infoMsg.reactions).length > 0 && (
                   <div>
-                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3 pt-4 border-t border-zinc-100">Reactions</h4>
+                    <h4 className="text-xs font-bold var-text-muted uppercase tracking-wider mb-3 pt-4 border-t var-border-color">Reactions</h4>
                     <div className="space-y-3">
                       {Object.entries(infoMsg.reactions).map(([emoji, usersMap]) => (
                         Object.entries(usersMap).map(([uid, data]) => (
                           <div key={`${emoji}-${uid}`} className="flex justify-between items-center text-sm">
-                            <div className="flex items-center gap-2 bg-zinc-50 px-2 py-1 rounded-md">
+                            <div className="flex items-center gap-2 var-bg-secondary px-2 py-1 rounded-md">
                               <span className="text-lg leading-none">{emoji}</span>
-                              <span className="font-semibold text-zinc-800">{data.displayName}</span>
+                              <span className="font-semibold var-text-primary">{data.displayName}</span>
                             </div>
-                            <span className="text-zinc-500 text-xs font-medium">{format(data.time, "h:mm a")}</span>
+                            <span className="var-text-secondary text-xs font-medium">{format(data.time, "h:mm a")}</span>
                           </div>
                         ))
                       ))}

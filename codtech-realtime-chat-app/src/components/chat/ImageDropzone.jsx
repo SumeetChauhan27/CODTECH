@@ -10,7 +10,7 @@ export default function ImageDropzone() {
       <button
         type="button"
         onClick={handleClick}
-        className="p-1.5 text-zinc-400 hover:text-blue-500 transition-colors shrink-0"
+        className="p-1.5 var-text-muted hover:text-blue-500 transition-colors shrink-0"
         title="Attach a file (Coming soon)"
       >
         <Paperclip className="w-5 h-5" />

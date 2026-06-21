@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import ChatPage from "./pages/ChatPage";
@@ -8,6 +9,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <Toaster position="top-center" toastOptions={{ className: 'neo-shadow-sm font-medium text-sm' }} />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route 

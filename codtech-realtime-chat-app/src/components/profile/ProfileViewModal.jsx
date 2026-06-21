@@ -49,30 +49,30 @@ export default function ProfileViewModal({ uid, onClose }) {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 w-full max-w-sm relative shadow-2xl overflow-hidden"
+        className="neo-bg neo-shadow-sm border border-white/50 rounded-3xl p-6 w-full max-w-sm relative overflow-hidden"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10"
+          className="absolute top-4 right-4 p-2 var-text-muted hover:var-text-primary neo-bg active:neo-pressed rounded-xl transition-colors z-10"
         >
           <X size={20} />
         </button>
 
         {loading ? (
           <div className="flex justify-center items-center h-48">
-            <Loader2 size={32} className="text-white/60 animate-spin" />
+            <Loader2 size={32} className="var-text-muted animate-spin" />
           </div>
         ) : profile ? (
           <div className="flex flex-col items-center mt-4 relative">
             <div className="relative group mb-4">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
+              <div className="absolute inset-0 neo-blue rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
               <img 
                 src={profile.photoURL} 
                 alt={profile.displayName} 
-                className="w-24 h-24 rounded-full border-2 border-white/20 relative z-10 object-cover"
+                className="w-24 h-24 rounded-full border-4 var-border-color relative z-10 object-cover"
               />
               <div 
-                className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-[#18181b] z-20 ${
+                className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 var-border-color z-20 ${
                   presence.state === "online" ? "bg-emerald-500" : 
                   presence.state === "away" ? "bg-amber-500" : "bg-zinc-500"
                 }`}
@@ -80,29 +80,26 @@ export default function ProfileViewModal({ uid, onClose }) {
               ></div>
             </div>
             
-            <h2 className="text-2xl font-bold text-white text-center">
+            <h2 className="text-2xl font-bold var-text-primary text-center">
               {profile.displayName}
             </h2>
             
-            <div className="flex items-center text-white/60 mt-1 mb-4 text-sm bg-white/5 px-3 py-1 rounded-full border border-white/10">
+            <div className="flex items-center var-text-secondary mt-1 mb-4 text-sm neo-pressed px-4 py-1.5 rounded-xl">
               <AtSign size={14} className="mr-1" />
               <span>{profile.username}</span>
             </div>
 
-            <div className="w-full bg-black/20 rounded-xl p-4 mb-4 border border-white/5">
-              <p className="text-white/80 text-center text-sm italic">
+            <div className="w-full neo-pressed rounded-2xl p-4 mb-4">
+              <p className="var-text-primary text-center text-[15px] italic">
                 {profile.bio || "No bio yet."}
               </p>
             </div>
 
-            <div className="flex items-center w-full justify-between px-4 py-3 bg-white/5 rounded-xl border border-white/10">
-              <div className="flex items-center text-white/50 text-xs">
+            <div className="flex items-center w-full justify-between px-4 py-3 neo-pressed rounded-xl">
+              <div className="flex items-center var-text-muted text-xs">
                 <Calendar size={14} className="mr-2" />
-                <span>Joined</span>
+                <span>Joined {profile.joinedAt && typeof profile.joinedAt.toDate === 'function' ? format(profile.joinedAt.toDate(), "MMM yyyy") : "Unknown"}</span>
               </div>
-              <span className="text-white/80 text-sm font-medium">
-                {profile.joinedAt ? format(profile.joinedAt.toDate(), "MMM d, yyyy") : "Recently"}
-              </span>
             </div>
           </div>
         ) : (

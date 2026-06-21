@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, arrayUnion, deleteDoc, arrayRemove } from "firebase/firestore";
 import { db } from "../../services/firebase";
-import { Hash, Plus, MessageSquare, Key, Trash2, LogOut, Copy } from "lucide-react";
+import { MessageSquare, Settings, LogOut, Users, Plus, Hash, Key, Moon, Sun, Trash2, Copy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -14,6 +14,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   const [newRoomName, setNewRoomName] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [joinStatus, setJoinStatus] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains("dark"));
   const [contextMenu, setContextMenu] = useState(null);
   
   const navigate = useNavigate();
@@ -78,13 +79,18 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
     return Math.random().toString(36).substring(2, 12).toUpperCase();
   };
 
+  const toggleDarkMode = () => {
+    const isDark = document.documentElement.classList.toggle("dark");
+    setIsDarkMode(isDark);
+  };
+
   const handleCreateRoom = async (e) => {
     e.preventDefault();
     if (!newRoomName.trim()) return;
     
     try {
       const docRef = await addDoc(collection(db, "rooms"), {
-        name: newRoomName.trim().toLowerCase().replace(/\s+/g, '-'),
+        name: newRoomName.trim(),
         createdAt: serverTimestamp(),
         createdBy: currentUser.uid,
         members: [currentUser.uid],
@@ -179,31 +185,38 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
       ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} 
       md:translate-x-0
       fixed md:static inset-y-0 left-0 z-40
-      w-64 bg-zinc-900 text-zinc-300 flex flex-col transition-transform duration-300 ease-in-out
+      w-72 neo-bg var-text-primary flex flex-col transition-transform duration-300 ease-in-out border-r border-white/50
     `}>
-      <div className="h-[72px] flex items-center px-6 border-b border-zinc-800 bg-zinc-950 shrink-0">
-        <MessageSquare className="w-6 h-6 text-indigo-500 mr-3 drop-shadow-md" />
-        <h1 className="font-bold text-xl text-white tracking-tight">ChatFlow</h1>
+      <div className="h-[80px] flex items-center px-6 shrink-0 z-10 neo-bg rounded-br-3xl neo-shadow-sm mb-4 mx-4 mt-4">
+        <MessageSquare className="w-6 h-6 text-blue-500 mr-3" />
+        <h1 className="font-bold text-xl var-text-primary tracking-tight">ChatFlow</h1>
       </div>
 
-      <div className="p-4 flex-1 overflow-y-auto scrollbar-thin">
+      <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
         {/* Actions Header */}
-        <div className="flex items-center justify-between mb-4 px-2 mt-2">
-          <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Channels</span>
-          <div className="flex gap-1">
+        <div className="flex items-center justify-between mb-6 px-2 mt-2">
+          <span className="text-[12px] font-bold var-text-secondary uppercase tracking-widest">Channels</span>
+          <div className="flex gap-3">
+            <button 
+              onClick={toggleDarkMode}
+              className="p-2 rounded-xl transition-all neo-bg neo-shadow-sm var-text-secondary hover:text-blue-500 active:scale-95"
+              title="Toggle Dark Mode"
+            >
+              {isDarkMode ? <Sun className="w-[16px] h-[16px]" /> : <Moon className="w-[16px] h-[16px]" />}
+            </button>
             <button 
               onClick={() => { setIsJoining(!isJoining); setIsCreating(false); }}
-              className={`p-1.5 rounded-lg transition-all ${isJoining ? 'bg-indigo-500/20 text-indigo-400' : 'text-zinc-400 hover:bg-zinc-800 hover:text-white active:scale-95'}`}
+              className={`p-2 rounded-xl transition-all neo-bg ${isJoining ? 'neo-pressed text-blue-500' : 'neo-shadow-sm var-text-secondary hover:text-blue-500 active:scale-95'}`}
               title="Join a room with code"
             >
-              <Key className="w-[15px] h-[15px]" />
+              <Key className="w-[16px] h-[16px]" />
             </button>
             <button 
               onClick={() => { setIsCreating(!isCreating); setIsJoining(false); }}
-              className={`p-1.5 rounded-lg transition-all ${isCreating ? 'bg-indigo-500/20 text-indigo-400' : 'text-zinc-400 hover:bg-zinc-800 hover:text-white active:scale-95'}`}
+              className={`p-2 rounded-xl transition-all neo-bg ${isCreating ? 'neo-pressed text-blue-500' : 'neo-shadow-sm var-text-secondary hover:text-blue-500 active:scale-95'}`}
               title="Create a new room"
             >
-              <Plus className="w-[15px] h-[15px]" />
+              <Plus className="w-[16px] h-[16px]" />
             </button>
           </div>
         </div>
@@ -224,9 +237,9 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                 placeholder="Room name..."
                 value={newRoomName}
                 onChange={(e) => setNewRoomName(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-zinc-600 shadow-inner"
+                className="w-full neo-pressed border-none rounded-xl px-4 py-3 text-sm var-text-primary focus:outline-none placeholder:var-text-muted"
               />
-              <button type="submit" className="w-full mt-2 bg-indigo-600 text-white text-xs font-bold tracking-wide py-2 rounded-xl hover:bg-indigo-500 transition-colors active:scale-95">
+              <button type="submit" className="w-full mt-4 neo-blue text-white text-xs font-bold tracking-widest uppercase py-3 rounded-xl transition-all active:scale-95">
                 Create
               </button>
             </motion.form>
@@ -250,25 +263,26 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 maxLength={10}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all uppercase tracking-widest placeholder:normal-case placeholder:tracking-normal placeholder:text-zinc-600 shadow-inner"
+                className="w-full neo-pressed border-none rounded-xl px-4 py-3 text-sm var-text-primary focus:outline-none placeholder:var-text-muted uppercase tracking-widest placeholder:normal-case placeholder:tracking-normal"
               />
               {joinStatus && (
-                <p className={`text-[10px] mt-1.5 font-medium ${joinStatus.includes('sent') ? 'text-emerald-400' : 'text-red-400'}`}>
+                <p className={`text-[11px] mt-2 font-bold ${joinStatus.includes('sent') ? 'text-emerald-500' : 'text-red-500'}`}>
                   {joinStatus}
                 </p>
               )}
-              <button type="submit" className="w-full mt-2 bg-zinc-800 text-white text-xs font-bold tracking-wide py-2 rounded-xl hover:bg-zinc-700 transition-colors active:scale-95 border border-zinc-700">
+              <button type="submit" className="w-full mt-4 neo-shadow-sm var-text-secondary text-xs font-bold tracking-widest uppercase py-3 rounded-xl hover:var-text-primary transition-all active:scale-95 active:neo-pressed border-none">
                 Request to Join
               </button>
             </motion.form>
           )}
         </AnimatePresence>
 
-        <div className="space-y-0.5">
+        <div className="space-y-4 pt-2">
           {rooms.map(room => {
             const msgTime = room.lastMessage?.createdAt?.toMillis ? room.lastMessage.createdAt.toMillis() : Date.now();
             const readTime = room.lastReadAt?.[currentUser.uid]?.toMillis ? room.lastReadAt[currentUser.uid].toMillis() : 0;
             const hasUnread = currentRoomId !== room.id && room.lastMessage && msgTime > readTime;
+            const isActive = currentRoomId === room.id;
             
             return (
               <button
@@ -278,23 +292,28 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                   setIsMobileOpen(false);
                 }}
                 onContextMenu={(e) => handleContextMenu(e, room)}
-                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all text-sm font-semibold group relative ${
-                  currentRoomId === room.id 
-                    ? "bg-indigo-500/10 text-indigo-400" 
-                    : "hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-200"
+                className={`w-full flex items-center px-5 py-4 rounded-2xl transition-all text-[15px] font-bold group relative border-none ${
+                  isActive 
+                    ? "neo-pressed var-text-primary" 
+                    : "neo-shadow-sm var-text-secondary hover:var-text-primary"
                 }`}
               >
-                <Hash className={`w-4 h-4 mr-3 shrink-0 transition-opacity ${hasUnread ? 'opacity-100 text-indigo-400' : 'opacity-50 group-hover:opacity-100'}`} />
-                <span className={`truncate tracking-tight ${hasUnread ? 'text-white' : ''}`}>{room.name}</span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 shrink-0 shadow-inner overflow-hidden ${isActive ? 'bg-blue-50' : 'neo-bg'}`}>
+                  {/* Using a placeholder avatar for the room based on its name */}
+                  <img src={`https://ui-avatars.com/api/?name=${room.name}&background=random&bold=true`} alt={room.name} className="w-full h-full object-cover" />
+                </div>
+                <span className="truncate tracking-tight flex-1 text-left">{room.name}</span>
                 {hasUnread && (
-                  <div className="absolute right-3 w-2 h-2 rounded-full bg-indigo-500"></div>
+                  <div className="ml-2 neo-red-badge px-2 py-0.5 rounded-full text-[11px] font-black flex items-center justify-center shadow-md border-2 border-white/50">
+                    1
+                  </div>
                 )}
               </button>
             );
           })}
           {rooms.length === 0 && !isCreating && !isJoining && (
-            <div className="text-xs text-zinc-500 px-2 mt-6 text-center font-medium bg-zinc-950 py-4 rounded-xl border border-zinc-800/50">
-              You are not in any rooms. Join or create one!
+            <div className="text-xs var-text-secondary px-4 mt-8 text-center font-bold neo-pressed py-6 rounded-2xl">
+              You are not in any rooms.<br/><br/>Join or create one!
             </div>
           )}
         </div>
@@ -317,7 +336,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
               setContextMenu(null);
             }}
           >
-            <Copy className="w-4 h-4 mr-3 text-zinc-400" /> Copy Invite Code
+            <Copy className="w-4 h-4 mr-3 var-text-muted" /> Copy Invite Code
           </button>
           
           <div className="h-px bg-zinc-800 my-1 mx-2"></div>

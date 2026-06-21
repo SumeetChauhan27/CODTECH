@@ -46,16 +46,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-zinc-100">
+    <div className="min-h-screen flex items-center justify-center var-bg-secondary px-4">
+      <div className="max-w-md w-full space-y-8 var-bg-primary p-10 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border var-border-color">
         <div className="text-center">
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-50 text-blue-600 mb-4">
             <MessageCircle className="h-6 w-6" />
           </div>
-          <h2 className="text-3xl font-semibold tracking-tight text-zinc-900">
+          <h2 className="text-3xl font-semibold tracking-tight var-text-primary">
             ChatFlow
           </h2>
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm var-text-secondary">
             Real-time chat, instantly
           </p>
         </div>
@@ -64,7 +64,7 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-zinc-200 rounded-lg text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border var-border-color rounded-lg text-sm font-medium text-zinc-700 var-bg-primary hover:var-bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -77,10 +77,10 @@ export default function LoginPage() {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-200" />
+              <div className="w-full border-t var-border-color" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-zinc-500">
+              <span className="px-2 var-bg-primary var-text-secondary">
                 — or sign in with email —
               </span>
             </div>
