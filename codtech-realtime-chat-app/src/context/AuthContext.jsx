@@ -7,7 +7,8 @@ import {
   updateProfile,
   signOut 
 } from "firebase/auth";
-import { auth, googleProvider } from "../services/firebase";
+import { auth, googleProvider, db } from "../services/firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -20,7 +21,31 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Ensure user document exists in Firestore
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) {
+          // Determine a base username (e.g., from email)
+          const baseName = user.displayName || user.email?.split("@")[0] || "user";
+          const username = baseName.toLowerCase().replace(/[^a-z0-9]/g, "") + Math.floor(Math.random() * 1000);
+          
+          await setDoc(userRef, {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || baseName,
+            username: username,
+            bio: "Hey there! I am using ChatFlow.",
+            photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || baseName)}&background=random`,
+            joinedAt: serverTimestamp(),
+            lastSeen: serverTimestamp(),
+            isOnline: true,
+            fcmTokens: []
+          });
+        }
+      }
       setCurrentUser(user);
       setLoading(false);
     });

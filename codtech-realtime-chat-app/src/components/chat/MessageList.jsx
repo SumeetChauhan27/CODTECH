@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, CheckCheck, Info, X, Trash2, Pin, Star, Copy } from "lucide-react";
 
-const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮"];
+const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮","😭"];
 
 export default function MessageList({ roomData }) {
   const [messages, setMessages] = useState([]);
@@ -25,14 +25,14 @@ export default function MessageList({ roomData }) {
     setLoading(true);
     const q = query(
       collection(db, "rooms", roomData.id, "messages"),
-      orderBy("createdAt", "asc"),
+      orderBy("createdAt", "desc"),
       limit(150)
     );
 
     const unsubscribe = onSnapshot(
       q, 
       (snapshot) => {
-        const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const msgs = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
         setMessages(msgs);
         setLoading(false);
         setError("");
