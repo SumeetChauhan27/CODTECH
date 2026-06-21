@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/layout/Sidebar";
 import MessageList from "../components/chat/MessageList";
 import MessageInput from "../components/chat/MessageInput";
-import { LogOut, Menu, Key, ShieldCheck, X, Pin, Search } from "lucide-react";
+import { LogOut, Menu, Key, ShieldCheck, X, Pin, Search, Settings } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useParams } from "react-router-dom";
 import { doc, onSnapshot, updateDoc, arrayRemove, arrayUnion, serverTimestamp } from "firebase/firestore";
@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ProfileEditModal from "../components/profile/ProfileEditModal";
 import PinnedMessageBanner from "../components/chat/PinnedMessageBanner";
 import MessageSearchModal from "../components/chat/MessageSearchModal";
+import RoomSettingsModal from "../components/chat/RoomSettingsModal";
 
 export default function ChatPage() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -20,6 +21,7 @@ export default function ChatPage() {
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [myPresence, setMyPresence] = useState("offline");
   
   const { currentUser, logout } = useAuth();
@@ -192,6 +194,16 @@ export default function ChatPage() {
               </button>
             )}
 
+            {isMember && (
+              <button
+                onClick={() => setShowSettingsModal(true)}
+                className="p-2.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all group active:scale-95 flex items-center gap-2"
+                title="Room Settings"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+            )}
+
             <div className="w-px h-8 bg-zinc-200 mx-2 hidden sm:block"></div>
 
             <button
@@ -226,9 +238,7 @@ export default function ChatPage() {
           {showProfileEdit && (
             <ProfileEditModal onClose={() => setShowProfileEdit(false)} />
           )}
-        </AnimatePresence>
-
-        <AnimatePresence>
+          
           {showSearchModal && roomData && (
             <MessageSearchModal 
               roomData={roomData} 
@@ -237,6 +247,13 @@ export default function ChatPage() {
                 setShowSearchModal(false);
                 handleScrollToMessage(id);
               }}
+            />
+          )}
+
+          {showSettingsModal && (
+            <RoomSettingsModal
+              roomData={roomData}
+              onClose={() => setShowSettingsModal(false)}
             />
           )}
         </AnimatePresence>
