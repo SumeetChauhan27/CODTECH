@@ -8,12 +8,14 @@ import { useParams } from "react-router-dom";
 import { doc, onSnapshot, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { motion, AnimatePresence } from "framer-motion";
+import ProfileEditModal from "../components/profile/ProfileEditModal";
 
 export default function ChatPage() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [roomData, setRoomData] = useState(null);
   const [showRequestsModal, setShowRequestsModal] = useState(false);
+  const [showProfileEdit, setShowProfileEdit] = useState(false);
   
   const { currentUser, logout } = useAuth();
   const { roomId: currentRoomId } = useParams();
@@ -123,12 +125,15 @@ export default function ChatPage() {
 
             <div className="w-px h-8 bg-zinc-200 mx-2 hidden sm:block"></div>
 
-            <div className="hidden sm:flex flex-col items-end mr-3">
+            <button
+              onClick={() => setShowProfileEdit(true)}
+              className="hidden sm:flex flex-col items-end mr-1 px-2 py-1 hover:bg-zinc-100 rounded-lg transition-colors text-right"
+            >
               <span className="text-sm font-bold text-zinc-800 leading-tight">
                 {currentUser?.displayName || currentUser?.email.split('@')[0]}
               </span>
-              <span className="text-[11px] font-medium text-emerald-500">Online</span>
-            </div>
+              <span className="text-[11px] font-medium text-emerald-500 hover:text-indigo-500 transition-colors">Edit Profile</span>
+            </button>
 
             <button
               onClick={logout}
@@ -139,6 +144,12 @@ export default function ChatPage() {
             </button>
           </div>
         </div>
+
+        <AnimatePresence>
+          {showProfileEdit && (
+            <ProfileEditModal onClose={() => setShowProfileEdit(false)} />
+          )}
+        </AnimatePresence>
 
         {/* Content Area */}
         <div className="flex-1 flex flex-col min-h-0 relative bg-zinc-50">

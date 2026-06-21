@@ -23,27 +23,33 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Ensure user document exists in Firestore
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (!userSnap.exists()) {
-          // Determine a base username (e.g., from email)
-          const baseName = user.displayName || user.email?.split("@")[0] || "user";
-          const username = baseName.toLowerCase().replace(/[^a-z0-9]/g, "") + Math.floor(Math.random() * 1000);
+        try {
+          // Ensure user document exists in Firestore
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
           
-          await setDoc(userRef, {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName || baseName,
-            username: username,
-            bio: "Hey there! I am using ChatFlow.",
-            photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || baseName)}&background=random`,
-            joinedAt: serverTimestamp(),
-            lastSeen: serverTimestamp(),
-            isOnline: true,
-            fcmTokens: []
-          });
+          if (!userSnap.exists()) {
+            // Determine a base username (e.g., from email)
+            const baseName = user.displayName || user.email?.split("@")[0] || "user";
+            const username = baseName.toLowerCase().replace(/[^a-z0-9]/g, "") + Math.floor(Math.random() * 1000);
+            
+            await setDoc(userRef, {
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName || baseName,
+              username: username,
+              bio: "Hey there! I am using ChatFlow.",
+              photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || baseName)}&background=random`,
+              joinedAt: serverTimestamp(),
+              lastSeen: serverTimestamp(),
+              isOnline: true,
+              fcmTokens: []
+            });
+          }
+        } catch (error) {
+          console.error("Error creating/fetching user profile in Firestore:", error);
+          // If this fails (e.g., due to missing Firebase security rules), 
+          // we still want to let the user log in so the app doesn't freeze.
         }
       }
       setCurrentUser(user);

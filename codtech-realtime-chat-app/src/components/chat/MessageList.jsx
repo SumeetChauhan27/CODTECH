@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, CheckCheck, Info, X, Trash2, Pin, Star, Copy } from "lucide-react";
+import ProfileViewModal from "../profile/ProfileViewModal";
 
 const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮","😭"];
 
@@ -15,6 +16,7 @@ export default function MessageList({ roomData }) {
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [infoMsg, setInfoMsg] = useState(null); 
   const [contextMenu, setContextMenu] = useState(null); // { x, y, msg }
+  const [selectedProfileUid, setSelectedProfileUid] = useState(null);
   const bottomRef = useRef(null);
   const menuRef = useRef(null);
   const { currentUser } = useAuth();
@@ -231,9 +233,19 @@ export default function MessageList({ roomData }) {
             )}
 
             {!isOwn && (
-              <span className="text-[11px] font-bold text-zinc-500 mb-1 ml-3 tracking-wide">
-                {msg.displayName}
-              </span>
+              <button 
+                onClick={() => setSelectedProfileUid(msg.uid)}
+                className="flex items-center gap-2 mb-1 ml-3 group/author"
+              >
+                <img 
+                  src={msg.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.displayName)}`} 
+                  alt={msg.displayName} 
+                  className="w-5 h-5 rounded-full object-cover shadow-sm group-hover/author:ring-2 ring-indigo-500/50 transition-all"
+                />
+                <span className="text-[11px] font-bold text-zinc-500 tracking-wide group-hover/author:text-indigo-500 transition-colors">
+                  {msg.displayName}
+                </span>
+              </button>
             )}
             
             <div className="flex items-center gap-2 relative">
@@ -433,6 +445,14 @@ export default function MessageList({ roomData }) {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {selectedProfileUid && (
+          <ProfileViewModal 
+            uid={selectedProfileUid} 
+            onClose={() => setSelectedProfileUid(null)} 
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
