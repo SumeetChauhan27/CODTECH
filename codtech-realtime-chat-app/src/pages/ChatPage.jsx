@@ -6,7 +6,8 @@ import { LogOut, Menu, Key, ShieldCheck, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useParams } from "react-router-dom";
 import { doc, onSnapshot, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
-import { db } from "../services/firebase";
+import { ref, onValue } from "firebase/database";
+import { db, rtdb } from "../services/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileEditModal from "../components/profile/ProfileEditModal";
 
@@ -16,9 +17,23 @@ export default function ChatPage() {
   const [roomData, setRoomData] = useState(null);
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [myPresence, setMyPresence] = useState("offline");
   
   const { currentUser, logout } = useAuth();
   const { roomId: currentRoomId } = useParams();
+
+  useEffect(() => {
+    if (!currentUser?.uid) return;
+    const presenceRef = ref(rtdb, `/status/${currentUser.uid}`);
+    const unsubscribe = onValue(presenceRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setMyPresence(snapshot.val().state);
+      } else {
+        setMyPresence("offline");
+      }
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
 
   useEffect(() => {
     if (!currentRoomId) {
@@ -132,7 +147,15 @@ export default function ChatPage() {
               <span className="text-sm font-bold text-zinc-800 leading-tight">
                 {currentUser?.displayName || currentUser?.email.split('@')[0]}
               </span>
-              <span className="text-[11px] font-medium text-emerald-500 hover:text-indigo-500 transition-colors">Edit Profile</span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className={`w-1.5 h-1.5 rounded-full ${
+                  myPresence === "online" ? "bg-emerald-500" : 
+                  myPresence === "away" ? "bg-amber-500" : "bg-zinc-500"
+                }`} />
+                <span className="text-[11px] font-medium text-zinc-500 group-hover:text-indigo-500 transition-colors">
+                  {myPresence === "online" ? "Online" : myPresence === "away" ? "Idle" : "Offline"} · Edit Profile
+                </span>
+              </div>
             </button>
 
             <button

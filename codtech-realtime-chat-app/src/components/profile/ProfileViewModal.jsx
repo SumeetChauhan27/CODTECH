@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../services/firebase";
+import { ref, onValue } from "firebase/database";
+import { db, rtdb } from "../../services/firebase";
 import { X, User, Calendar, AtSign, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 
 export default function ProfileViewModal({ uid, onClose }) {
   const [profile, setProfile] = useState(null);
+  const [presence, setPresence] = useState({ state: "offline", lastChanged: null });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!uid) return;
     
+    // Fetch static profile data from Firestore
     const fetchProfile = async () => {
       try {
         const docRef = doc(db, "users", uid);
@@ -26,6 +29,18 @@ export default function ProfileViewModal({ uid, onClose }) {
       }
     };
     fetchProfile();
+
+    // Listen to real-time presence from RTDB
+    const presenceRef = ref(rtdb, `/status/${uid}`);
+    const unsubscribePresence = onValue(presenceRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setPresence(snapshot.val());
+      } else {
+        setPresence({ state: "offline", lastChanged: null });
+      }
+    });
+
+    return () => unsubscribePresence();
   }, [uid]);
 
   return (
@@ -48,7 +63,7 @@ export default function ProfileViewModal({ uid, onClose }) {
             <Loader2 size={32} className="text-white/60 animate-spin" />
           </div>
         ) : profile ? (
-          <div className="flex flex-col items-center mt-4">
+          <div className="flex flex-col items-center mt-4 relative">
             <div className="relative group mb-4">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
               <img 
@@ -56,6 +71,13 @@ export default function ProfileViewModal({ uid, onClose }) {
                 alt={profile.displayName} 
                 className="w-24 h-24 rounded-full border-2 border-white/20 relative z-10 object-cover"
               />
+              <div 
+                className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-[#18181b] z-20 ${
+                  presence.state === "online" ? "bg-emerald-500" : 
+                  presence.state === "away" ? "bg-amber-500" : "bg-zinc-500"
+                }`}
+                title={presence.state === "online" ? "Online" : presence.state === "away" ? "Idle" : "Offline"}
+              ></div>
             </div>
             
             <h2 className="text-2xl font-bold text-white text-center">

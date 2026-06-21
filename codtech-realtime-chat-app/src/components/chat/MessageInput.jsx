@@ -4,6 +4,8 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import { useAuth } from "../../context/AuthContext";
 import EmojiPicker from "emoji-picker-react";
+import { useTypingIndicator } from "../../hooks/useTypingIndicator";
+import TypingIndicator from "./TypingIndicator";
 
 export default function MessageInput({ roomData }) {
   const [text, setText] = useState("");
@@ -11,6 +13,7 @@ export default function MessageInput({ roomData }) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const { currentUser } = useAuth();
   const pickerRef = useRef(null);
+  const { typingString, handleTyping, clearTyping } = useTypingIndicator(roomData?.id);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -31,13 +34,13 @@ export default function MessageInput({ roomData }) {
     try {
       setIsSending(true);
       setShowEmojiPicker(false);
-      await addDoc(collection(db, "rooms", roomData.id, "messages"), {
+      
+      const payload = {
         uid: currentUser.uid,
         displayName: currentName,
         photoURL: currentUser.photoURL || "",
         text: text.trim(),
         createdAt: serverTimestamp(),
-        // New Schema: object mapping uid to details and timestamp
         readBy: {
           [currentUser.uid]: {
             displayName: currentName,
@@ -45,11 +48,16 @@ export default function MessageInput({ roomData }) {
           }
         },
         reactions: {}
-      });
+      };
+      
+      console.log("Sending message payload:", payload);
+      
+      await addDoc(collection(db, "rooms", roomData.id, "messages"), payload);
       setText("");
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
+      clearTyping();
       setIsSending(false);
     }
   };
@@ -69,16 +77,21 @@ export default function MessageInput({ roomData }) {
 
   return (
     <div className="relative shrink-0">
-      {/* Emoji Picker Popover */}
+      <TypingIndicator typingString={typingString} />
+      
       {showEmojiPicker && (
-        <div ref={pickerRef} className="absolute bottom-full left-4 mb-2 z-50 shadow-2xl rounded-2xl overflow-hidden border border-zinc-100">
+        <div 
+          ref={pickerRef}
+          className="absolute bottom-full right-4 mb-2 shadow-2xl rounded-2xl overflow-hidden border border-zinc-100 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
+        >
           <EmojiPicker 
-            onEmojiClick={onEmojiClick}
+            onEmojiClick={(e) => {
+              setText(prev => prev + e.emoji);
+              handleTyping();
+            }}
             theme="light"
             skinTonesDisabled
-            searchDisabled
-            width={320}
-            height={400}
+            searchPlaceHolder="Search emoji..."
             previewConfig={{ showPreview: false }}
           />
         </div>
@@ -86,7 +99,7 @@ export default function MessageInput({ roomData }) {
 
       <form 
         onSubmit={handleSend} 
-        className="px-4 py-3 bg-white/80 backdrop-blur-xl border-t border-zinc-200/60 flex items-end gap-3 shrink-0"
+        className="px-4 py-3 bg-white/80 backdrop-blur-xl border-t border-zinc-200/60 flex items-end gap-3 shrink-0 relative z-20"
       >
         <div className="flex-1 bg-zinc-100/80 rounded-2xl flex items-end px-4 py-2 border border-zinc-200/50 transition-colors focus-within:bg-white focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/10">
           <button
@@ -99,7 +112,10 @@ export default function MessageInput({ roomData }) {
           
           <textarea
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              handleTyping();
+            }}
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={text.split("\n").length > 3 ? 3 : text.split("\n").length}

@@ -7,8 +7,10 @@ import {
   updateProfile,
   signOut 
 } from "firebase/auth";
-import { auth, googleProvider, db } from "../services/firebase";
+import { auth, googleProvider, db, rtdb } from "../services/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { ref, onValue, onDisconnect, set, serverTimestamp as rtdbServerTimestamp } from "firebase/database";
+import { useIdle } from "../hooks/useIdle";
 
 const AuthContext = createContext();
 
@@ -19,6 +21,9 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Use a 5-minute timeout for idle detection
+  const isIdle = useIdle(5 * 60 * 1000);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -57,6 +62,52 @@ export function AuthProvider({ children }) {
     });
     return unsubscribe;
   }, []);
+
+  // Presence system via Realtime Database
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const userStatusDatabaseRef = ref(rtdb, `/status/${currentUser.uid}`);
+    const connectedRef = ref(rtdb, ".info/connected");
+
+    const unsubscribe = onValue(connectedRef, (snapshot) => {
+      if (snapshot.val() === false) {
+        return;
+      }
+
+      onDisconnect(userStatusDatabaseRef).set({
+        state: "offline",
+        lastChanged: rtdbServerTimestamp(),
+      }).then(() => {
+        set(userStatusDatabaseRef, {
+          state: isIdle ? "away" : "online",
+          lastChanged: rtdbServerTimestamp(),
+        });
+      });
+    });
+
+    return () => {
+      set(userStatusDatabaseRef, {
+        state: "offline",
+        lastChanged: rtdbServerTimestamp(),
+      });
+      unsubscribe();
+    };
+  }, [currentUser]); // We don't want to re-run the whole connection setup when isIdle changes
+
+  // Update RTDB when isIdle changes, but only if we are connected
+  useEffect(() => {
+    if (!currentUser) return;
+    
+    // We just write to RTDB. If we're disconnected, it will fail silently or queue,
+    // which is fine because onDisconnect handles actual disconnects.
+    const userStatusDatabaseRef = ref(rtdb, `/status/${currentUser.uid}`);
+    set(userStatusDatabaseRef, {
+      state: isIdle ? "away" : "online",
+      lastChanged: rtdbServerTimestamp(),
+    }).catch(console.error);
+    
+  }, [isIdle, currentUser]);
 
   const signInWithGoogle = () => {
     return signInWithPopup(auth, googleProvider);
