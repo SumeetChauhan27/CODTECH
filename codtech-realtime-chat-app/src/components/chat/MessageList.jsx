@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { collection, query, orderBy, limit, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, query, orderBy, limit, onSnapshot, doc, updateDoc, deleteDoc, deleteField } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { format } from "date-fns";
@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, CheckCheck, Info, X, Trash2, Pin, Star, Copy, FileText, Pencil } from "lucide-react";
 import ProfileViewModal from "../profile/ProfileViewModal";
 import ImageLightbox from "./ImageLightbox";
+import PinDurationModal from "./PinDurationModal";
 
 const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮","😭"];
 
@@ -19,6 +20,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
   const [contextMenu, setContextMenu] = useState(null); // { x, y, msg }
   const [selectedProfileUid, setSelectedProfileUid] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [pinMessageData, setPinMessageData] = useState(null);
   const bottomRef = useRef(null);
   const menuRef = useRef(null);
   const { currentUser } = useAuth();
@@ -124,9 +126,16 @@ export default function MessageList({ roomData, setEditingMessage }) {
 
   const handleTogglePin = async (msg) => {
     try {
-      await updateDoc(doc(db, "rooms", roomData.id, "messages", msg.id), {
-        isPinned: !msg.isPinned
-      });
+      if (!msg.isPinned || (msg.pinnedUntil && msg.pinnedUntil <= Date.now())) {
+        // Not currently pinned, open modal
+        setPinMessageData(msg);
+      } else {
+        // Pinned, so unpin
+        await updateDoc(doc(db, "rooms", roomData.id, "messages", msg.id), {
+          isPinned: false,
+          pinnedUntil: deleteField()
+        });
+      }
       setContextMenu(null);
     } catch (err) {
       console.error("Error pinning message", err);
@@ -214,22 +223,24 @@ export default function MessageList({ roomData, setEditingMessage }) {
         const readByUids = Array.isArray(msg.readBy) ? msg.readBy : Object.keys(msg.readBy || {});
         const isFullyRead = readByUids.length >= membersCount;
         const isStarred = msg.starredBy?.includes(currentUser.uid);
+        const isPinnedActive = msg.isPinned && (!msg.pinnedUntil || msg.pinnedUntil > Date.now());
         
         return (
           <motion.div 
             initial={{ opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.2 }}
-            key={msg.id} 
+            key={msg.id}
+            id={`msg-${msg.id}`}
             className={`flex flex-col ${isOwn ? "items-end" : "items-start"} relative group`}
             onMouseEnter={() => setHoveredMsgId(msg.id)}
             onMouseLeave={() => setHoveredMsgId(null)}
             onContextMenu={(e) => handleContextMenu(e, msg)}
           >
             {/* Context Indicators (Pinned/Starred) */}
-            {(msg.isPinned || isStarred) && (
+            {(isPinnedActive || isStarred) && (
               <div className={`flex items-center gap-1.5 mb-1 ${isOwn ? 'mr-3' : 'ml-3'}`}>
-                {msg.isPinned && <span className="text-[10px] font-bold text-orange-500 uppercase flex items-center gap-0.5 bg-orange-100 px-1.5 py-0.5 rounded-sm"><Pin className="w-3 h-3"/> Pinned</span>}
+                {isPinnedActive && <span className="text-[10px] font-bold text-orange-500 uppercase flex items-center gap-0.5 bg-orange-100 px-1.5 py-0.5 rounded-sm"><Pin className="w-3 h-3"/> Pinned</span>}
                 {isStarred && <span className="text-[10px] font-bold text-yellow-500 uppercase flex items-center gap-0.5 bg-yellow-50 px-1.5 py-0.5 rounded-sm"><Star className="w-3 h-3 fill-yellow-400"/> Starred</span>}
               </div>
             )}
@@ -287,7 +298,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
                 isOwn 
                   ? "bg-indigo-600 text-white rounded-br-sm" 
                   : "bg-white text-zinc-900 rounded-tl-sm border border-zinc-200/60"
-              } ${msg.isPinned ? 'ring-2 ring-orange-400/50' : ''}`}>
+              } ${isPinnedActive ? 'ring-2 ring-orange-400/50' : ''}`}>
                 {msg.imageURL && (
                   <div className="mb-2 -mx-2 -mt-1 rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity" onClick={(e) => { e.stopPropagation(); setSelectedImage(msg.imageURL); }}>
                     <img src={msg.imageURL} alt="Shared image" className="max-w-full max-h-64 object-cover" />
@@ -394,7 +405,7 @@ export default function MessageList({ roomData, setEditingMessage }) {
                 onClick={() => handleTogglePin(contextMenu.msg)}
               >
                 <Pin className="w-4 h-4 mr-3 text-orange-400" /> 
-                {contextMenu.msg.isPinned ? "Unpin for All" : "Pin for All"}
+                {(contextMenu.msg.isPinned && (!contextMenu.msg.pinnedUntil || contextMenu.msg.pinnedUntil > Date.now())) ? "Unpin for All" : "Pin for All"}
               </button>
             )}
 
@@ -491,6 +502,16 @@ export default function MessageList({ roomData, setEditingMessage }) {
           <ProfileViewModal 
             uid={selectedProfileUid} 
             onClose={() => setSelectedProfileUid(null)} 
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {pinMessageData && (
+          <PinDurationModal 
+            roomData={roomData}
+            message={pinMessageData}
+            onClose={() => setPinMessageData(null)}
           />
         )}
       </AnimatePresence>

@@ -4,7 +4,7 @@ import { db } from "../../services/firebase";
 import { Search, X, MessageSquare, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
-export default function MessageSearchModal({ roomData, onClose }) {
+export default function MessageSearchModal({ roomData, onClose, onMessageClick }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -107,7 +107,11 @@ export default function MessageSearchModal({ roomData, onClose }) {
           {hasSearched && !isSearching && results.length > 0 && (
             <div className="space-y-1 p-2">
               {results.map(msg => (
-                <div key={msg.id} className="p-3 hover:bg-zinc-50 rounded-xl transition-colors border border-transparent hover:border-zinc-100 group cursor-pointer">
+                <div 
+                  key={msg.id} 
+                  onClick={() => onMessageClick && onMessageClick(msg.id)}
+                  className="p-3 hover:bg-zinc-50 rounded-xl transition-colors border border-transparent hover:border-zinc-100 group cursor-pointer"
+                >
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <img 

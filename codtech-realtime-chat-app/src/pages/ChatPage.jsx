@@ -10,7 +10,7 @@ import { ref, onValue } from "firebase/database";
 import { db, rtdb } from "../services/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileEditModal from "../components/profile/ProfileEditModal";
-import PinnedMessagesPanel from "../components/chat/PinnedMessagesPanel";
+import PinnedMessageBanner from "../components/chat/PinnedMessageBanner";
 import MessageSearchModal from "../components/chat/MessageSearchModal";
 
 export default function ChatPage() {
@@ -19,7 +19,6 @@ export default function ChatPage() {
   const [roomData, setRoomData] = useState(null);
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
-  const [showPinnedPanel, setShowPinnedPanel] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [myPresence, setMyPresence] = useState("offline");
   
@@ -95,6 +94,19 @@ export default function ChatPage() {
     }
   };
 
+  const handleScrollToMessage = (msgId) => {
+    const el = document.getElementById(`msg-${msgId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.style.transition = "background-color 0.5s ease";
+      el.style.backgroundColor = "rgba(254, 215, 170, 0.4)"; // orange-200/40
+      el.style.borderRadius = "0.75rem";
+      setTimeout(() => {
+        el.style.backgroundColor = "transparent";
+      }, 2000);
+    }
+  };
+
   const [editingMessage, setEditingMessage] = useState(null);
 
   // When room changes, clear editing state
@@ -166,24 +178,9 @@ export default function ChatPage() {
               <button
                 onClick={() => setShowSearchModal(true)}
                 className="p-2.5 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all group active:scale-95 flex items-center gap-2"
-                title="Search Messages (Ctrl+K)"
+                title="Search Messages"
               >
                 <Search className="w-5 h-5" />
-                <span className="hidden lg:flex items-center gap-1 text-[10px] font-bold text-zinc-400 bg-zinc-100 group-hover:bg-blue-100 group-hover:text-blue-600 px-1.5 py-0.5 rounded-md transition-colors">
-                  <span className="font-sans">⌘</span>K
-                </span>
-              </button>
-            )}
-
-            {isMember && (
-              <button
-                onClick={() => setShowPinnedPanel(!showPinnedPanel)}
-                className={`p-2.5 rounded-xl transition-all group active:scale-95 ${
-                  showPinnedPanel ? 'bg-orange-100 text-orange-600' : 'text-zinc-400 hover:text-orange-500 hover:bg-orange-50'
-                }`}
-                title="Pinned Messages"
-              >
-                <Pin className="w-5 h-5" />
               </button>
             )}
 
@@ -227,7 +224,11 @@ export default function ChatPage() {
           {showSearchModal && roomData && (
             <MessageSearchModal 
               roomData={roomData} 
-              onClose={() => setShowSearchModal(false)} 
+              onClose={() => setShowSearchModal(false)}
+              onMessageClick={(id) => {
+                setShowSearchModal(false);
+                handleScrollToMessage(id);
+              }}
             />
           )}
         </AnimatePresence>
@@ -253,16 +254,10 @@ export default function ChatPage() {
           ) : isMember ? (
             <div className="flex-1 flex min-h-0 relative">
               <div className="flex-1 flex flex-col min-w-0">
+                <PinnedMessageBanner roomData={roomData} onMessageClick={handleScrollToMessage} />
                 <MessageList roomData={roomData} setEditingMessage={setEditingMessage} />
                 <MessageInput roomData={roomData} editingMessage={editingMessage} setEditingMessage={setEditingMessage} />
               </div>
-              
-              {showPinnedPanel && (
-                <PinnedMessagesPanel 
-                  roomData={roomData} 
-                  onClose={() => setShowPinnedPanel(false)} 
-                />
-              )}
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-6 bg-zinc-50">
