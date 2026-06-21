@@ -4,13 +4,13 @@ import { db } from "../../services/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, CheckCheck, Info, X, Trash2, Pin, Star, Copy, FileText } from "lucide-react";
+import { Check, CheckCheck, Info, X, Trash2, Pin, Star, Copy, FileText, Pencil } from "lucide-react";
 import ProfileViewModal from "../profile/ProfileViewModal";
 import ImageLightbox from "./ImageLightbox";
 
 const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮","😭"];
 
-export default function MessageList({ roomData }) {
+export default function MessageList({ roomData, setEditingMessage }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -315,7 +315,7 @@ export default function MessageList({ roomData }) {
                 {msg.text && (
                   <p className="text-[15px] whitespace-pre-wrap leading-relaxed font-medium tracking-tight">
                     {msg.text}
-                    <span className="inline-block w-14 h-4" />
+                    <span className={`inline-block h-4 ${msg.editedAt ? "w-[80px]" : "w-14"}`} />
                   </p>
                 )}
                 
@@ -323,7 +323,8 @@ export default function MessageList({ roomData }) {
                   className="absolute bottom-1 right-2.5 flex items-center gap-1.5 cursor-pointer"
                   onClick={() => setInfoMsg(msg)}
                 >
-                  <span className={`text-[10px] font-semibold ${isOwn ? "text-indigo-200" : "text-zinc-400"}`}>
+                  <span className={`text-[10px] font-semibold flex items-center gap-1 ${isOwn ? "text-indigo-200" : "text-zinc-400"}`}>
+                    {msg.editedAt && <span className="opacity-75 italic">(edited)</span>}
                     {timeString}
                   </span>
                   
@@ -398,12 +399,23 @@ export default function MessageList({ roomData }) {
             )}
 
             {contextMenu.msg.uid === currentUser.uid && (
-              <button 
-                className="w-full flex items-center px-4 py-2 hover:bg-red-50 text-red-600 transition-colors border-t border-zinc-100"
-                onClick={() => handleDeleteMessage(contextMenu.msg.id)}
-              >
-                <Trash2 className="w-4 h-4 mr-3 text-red-400" /> Delete
-              </button>
+              <>
+                <button 
+                  className="w-full flex items-center px-4 py-2 hover:bg-indigo-50 text-indigo-600 transition-colors border-t border-zinc-100"
+                  onClick={() => {
+                    setEditingMessage(contextMenu.msg);
+                    setContextMenu(null);
+                  }}
+                >
+                  <Pencil className="w-4 h-4 mr-3 text-indigo-400" /> Edit
+                </button>
+                <button 
+                  className="w-full flex items-center px-4 py-2 hover:bg-red-50 text-red-600 transition-colors border-t border-zinc-100"
+                  onClick={() => handleDeleteMessage(contextMenu.msg.id)}
+                >
+                  <Trash2 className="w-4 h-4 mr-3 text-red-400" /> Delete
+                </button>
+              </>
             )}
           </motion.div>
         )}

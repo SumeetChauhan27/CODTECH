@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/layout/Sidebar";
 import MessageList from "../components/chat/MessageList";
 import MessageInput from "../components/chat/MessageInput";
-import { LogOut, Menu, Key, ShieldCheck, X } from "lucide-react";
+import { LogOut, Menu, Key, ShieldCheck, X, Pin } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useParams } from "react-router-dom";
 import { doc, onSnapshot, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
@@ -10,6 +10,7 @@ import { ref, onValue } from "firebase/database";
 import { db, rtdb } from "../services/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileEditModal from "../components/profile/ProfileEditModal";
+import PinnedMessagesPanel from "../components/chat/PinnedMessagesPanel";
 
 export default function ChatPage() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -17,6 +18,7 @@ export default function ChatPage() {
   const [roomData, setRoomData] = useState(null);
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [showPinnedPanel, setShowPinnedPanel] = useState(false);
   const [myPresence, setMyPresence] = useState("offline");
   
   const { currentUser, logout } = useAuth();
@@ -78,6 +80,13 @@ export default function ChatPage() {
     }
   };
 
+  const [editingMessage, setEditingMessage] = useState(null);
+
+  // When room changes, clear editing state
+  useEffect(() => {
+    setEditingMessage(null);
+  }, [currentRoomId]);
+
   const isMember = roomData?.members?.includes(currentUser.uid);
   const isCreator = roomData?.createdBy === currentUser.uid;
   const hasPendingRequest = roomData?.pendingRequests?.some(r => r.uid === currentUser.uid);
@@ -138,6 +147,18 @@ export default function ChatPage() {
               </button>
             )}
 
+            {isMember && (
+              <button
+                onClick={() => setShowPinnedPanel(!showPinnedPanel)}
+                className={`p-2.5 rounded-xl transition-all group active:scale-95 ${
+                  showPinnedPanel ? 'bg-orange-100 text-orange-600' : 'text-zinc-400 hover:text-orange-500 hover:bg-orange-50'
+                }`}
+                title="Pinned Messages"
+              >
+                <Pin className="w-5 h-5" />
+              </button>
+            )}
+
             <div className="w-px h-8 bg-zinc-200 mx-2 hidden sm:block"></div>
 
             <button
@@ -193,10 +214,19 @@ export default function ChatPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : isMember ? (
-            <>
-              <MessageList roomData={roomData} />
-              <MessageInput roomData={roomData} />
-            </>
+            <div className="flex-1 flex min-h-0 relative">
+              <div className="flex-1 flex flex-col min-w-0">
+                <MessageList roomData={roomData} setEditingMessage={setEditingMessage} />
+                <MessageInput roomData={roomData} editingMessage={editingMessage} setEditingMessage={setEditingMessage} />
+              </div>
+              
+              {showPinnedPanel && (
+                <PinnedMessagesPanel 
+                  roomData={roomData} 
+                  onClose={() => setShowPinnedPanel(false)} 
+                />
+              )}
+            </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-6 bg-zinc-50">
               <div className="max-w-sm w-full bg-white p-8 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-zinc-100 text-center">

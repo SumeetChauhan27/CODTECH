@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Smile } from "lucide-react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { Send, Smile, X, Check } from "lucide-react";
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import { useAuth } from "../../context/AuthContext";
 import EmojiPicker from "emoji-picker-react";
@@ -9,7 +9,7 @@ import TypingIndicator from "./TypingIndicator";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import ImageDropzone from "./ImageDropzone";
 
-export default function MessageInput({ roomData }) {
+export default function MessageInput({ roomData, editingMessage, setEditingMessage }) {
   const [text, setText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -30,6 +30,13 @@ export default function MessageInput({ roomData }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (editingMessage) {
+      setText(editingMessage.text || "");
+      setSelectedFile(null);
+    }
+  }, [editingMessage]);
+
   const handleSend = async (e) => {
     if (e) e.preventDefault();
     if ((!text.trim() && !selectedFile) || !roomData || isUploading || isSending) return;
@@ -40,40 +47,49 @@ export default function MessageInput({ roomData }) {
       setIsSending(true);
       setShowEmojiPicker(false);
       
-      let uploadedFileURL = null;
-      if (selectedFile) {
-        uploadedFileURL = await uploadImage(selectedFile, `rooms/${roomData.id}`);
-        if (!uploadedFileURL) {
-          setIsSending(false);
-          return; // Upload failed
-        }
-      }
-      
-      const isImage = selectedFile?.type?.startsWith('image/');
-
-      const payload = {
-        uid: currentUser.uid,
-        displayName: currentName,
-        photoURL: currentUser.photoURL || "",
-        text: text.trim(),
-        imageURL: isImage ? uploadedFileURL : null,
-        fileURL: !isImage && selectedFile ? uploadedFileURL : null,
-        fileName: selectedFile ? selectedFile.name : null,
-        fileType: selectedFile ? selectedFile.type : null,
-        fileSize: selectedFile ? selectedFile.size : null,
-        createdAt: serverTimestamp(),
-        readBy: {
-          [currentUser.uid]: {
-            displayName: currentName,
-            time: Date.now()
+      if (editingMessage) {
+        await updateDoc(doc(db, "rooms", roomData.id, "messages", editingMessage.id), {
+          text: text.trim(),
+          editedAt: serverTimestamp()
+        });
+        setEditingMessage(null);
+        setText("");
+      } else {
+        let uploadedFileURL = null;
+        if (selectedFile) {
+          uploadedFileURL = await uploadImage(selectedFile, `rooms/${roomData.id}`);
+          if (!uploadedFileURL) {
+            setIsSending(false);
+            return; // Upload failed
           }
-        },
-        reactions: {}
-      };
-      
-      await addDoc(collection(db, "rooms", roomData.id, "messages"), payload);
-      setText("");
-      setSelectedFile(null);
+        }
+        
+        const isImage = selectedFile?.type?.startsWith('image/');
+
+        const payload = {
+          uid: currentUser.uid,
+          displayName: currentName,
+          photoURL: currentUser.photoURL || "",
+          text: text.trim(),
+          imageURL: isImage ? uploadedFileURL : null,
+          fileURL: !isImage && selectedFile ? uploadedFileURL : null,
+          fileName: selectedFile ? selectedFile.name : null,
+          fileType: selectedFile ? selectedFile.type : null,
+          fileSize: selectedFile ? selectedFile.size : null,
+          createdAt: serverTimestamp(),
+          readBy: {
+            [currentUser.uid]: {
+              displayName: currentName,
+              time: Date.now()
+            }
+          },
+          reactions: {}
+        };
+        
+        await addDoc(collection(db, "rooms", roomData.id, "messages"), payload);
+        setText("");
+        setSelectedFile(null);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -86,17 +102,16 @@ export default function MessageInput({ roomData }) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    } else if (e.key === "Escape" && editingMessage) {
+      setEditingMessage(null);
+      setText("");
     }
-  };
-
-  const onEmojiClick = (emojiObject) => {
-    setText((prevInput) => prevInput + emojiObject.emoji);
   };
 
   if (!roomData) return null;
 
   return (
-    <div className="relative shrink-0">
+    <div className="relative shrink-0 flex flex-col">
       <TypingIndicator typingString={typingString} />
       
       {showEmojiPicker && (
@@ -117,9 +132,27 @@ export default function MessageInput({ roomData }) {
         </div>
       )}
 
+      {editingMessage && (
+        <div className="flex items-center justify-between px-6 py-2 bg-indigo-50 border-t border-indigo-100 relative z-20 shadow-inner">
+          <div className="flex items-center gap-3">
+            <span className="text-indigo-600 font-bold text-sm tracking-tight">Editing message</span>
+            <span className="text-zinc-500 text-sm truncate max-w-[200px] sm:max-w-[400px]">{editingMessage.text}</span>
+          </div>
+          <button 
+            onClick={() => {
+              setEditingMessage(null);
+              setText("");
+            }}
+            className="p-1.5 hover:bg-indigo-100 rounded-lg text-indigo-500 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <form 
         onSubmit={handleSend} 
-        className="px-4 py-3 bg-white/80 backdrop-blur-xl border-t border-zinc-200/60 shrink-0 relative z-20"
+        className={`px-4 py-3 bg-white/80 backdrop-blur-xl shrink-0 relative z-20 ${!editingMessage && 'border-t border-zinc-200/60'}`}
       >
         {isUploading && progress > 0 && (
           <div className="absolute top-0 left-0 right-0 h-1 bg-blue-100 rounded-t-xl overflow-hidden">
@@ -140,11 +173,13 @@ export default function MessageInput({ roomData }) {
               <Smile className="w-6 h-6" />
             </button>
 
-            <ImageDropzone 
-              selectedFile={selectedFile}
-              onFileSelected={setSelectedFile}
-              onClear={() => setSelectedFile(null)}
-            />
+            {!editingMessage && (
+              <ImageDropzone 
+                selectedFile={selectedFile}
+                onFileSelected={setSelectedFile}
+                onClear={() => setSelectedFile(null)}
+              />
+            )}
             
             <textarea
               value={text}
@@ -153,7 +188,7 @@ export default function MessageInput({ roomData }) {
                 handleTyping();
               }}
               onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
+              placeholder={editingMessage ? "Edit message..." : "Type a message..."}
               rows={text.split("\n").length > 3 ? 3 : text.split("\n").length}
               className="w-full max-h-32 bg-transparent focus:outline-none resize-none text-[15px] py-1.5 scrollbar-thin ml-2 text-zinc-800 placeholder:text-zinc-400"
             />
@@ -162,9 +197,13 @@ export default function MessageInput({ roomData }) {
           <button
             type="submit"
             disabled={(!text.trim() && !selectedFile) || isUploading || isSending}
-            className="w-11 h-11 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-all hover:scale-105 active:scale-95 shrink-0 shadow-md shadow-blue-600/20"
+            className={`w-11 h-11 flex items-center justify-center text-white rounded-full transition-all hover:scale-105 active:scale-95 shrink-0 shadow-md ${
+              editingMessage 
+                ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 disabled:bg-indigo-400" 
+                : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20 disabled:bg-blue-400"
+            }`}
           >
-            <Send className="w-5 h-5 ml-0.5" />
+            {editingMessage ? <Check className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />}
           </button>
         </div>
       </form>
