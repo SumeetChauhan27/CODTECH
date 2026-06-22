@@ -14,6 +14,7 @@ import ProfileEditModal from "../components/profile/ProfileEditModal";
 import MessageSearchModal from "../components/chat/MessageSearchModal";
 import PinnedMessageBanner from "../components/chat/PinnedMessageBanner";
 import RoomSettingsModal from "../components/chat/RoomSettingsModal";
+import NotificationDropdown from "../components/layout/NotificationDropdown";
 
 export default function ChatPage() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -193,6 +194,8 @@ export default function ChatPage() {
             >
               <Search className="w-4 h-4" />
             </button>
+
+            <NotificationDropdown />
             
             {isMember && (
               <button
