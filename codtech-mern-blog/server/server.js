@@ -17,7 +17,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/posts', require('./routes/posts')); // To be added in next phase
+app.use('/api/posts', require('./routes/posts'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
