@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# P21 Next.js E-Commerce Site
 
-## Getting Started
+* **Intern ID:** CITS3982
+* **Student Name:** Sumeet Chauhan
+* **Project Title:** Next.js Multi-Page E-Commerce Site
+* **Company:** CODTECH IT Solutions
 
-First, run the development server:
+## Features
+- **Modern Landing Page:** Beautiful hero section with shortcuts to product categories, featured products, and a newsletter sign-up.
+- **Dynamic Product Filtering:** Browse products easily with sidebar filters for Categories, Price range sliders, and robust sorting capabilities.
+- **Detailed Product Pages:** Includes beautiful imagery, comprehensive variant selection (sizes/colors), and simulated customer reviews.
+- **Global Shopping Cart:** In-memory cart state maintained seamlessly across all pages.
+- **Simulated Checkout Flow:** Realistic mock payment UI capturing shipping and payment info, yielding a beautiful order confirmation status.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Technologies Used
+- **Next.js 14** (App Router & Server Components)
+- **React.js** (Context API & Client Hooks)
+- **Tailwind CSS** (Utility-first styling framework)
+- **React Icons** (Scalable vector icons)
+- **React Hot Toast** (Elegant push notifications)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Installation Steps
+1. Clone the repository to your local machine.
+2. Open a terminal and navigate to the `codtech-nextjs-ecommerce` directory.
+3. Run `npm install` to download all necessary dependencies.
+4. Start the local development server using `npm run dev`.
+5. Open your browser and navigate to `http://localhost:3000` to view the application.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Screenshots
+*(Add your screenshots inside the `screenshots` folder and link them here)*
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Future Improvements
+- Integrate an actual payment gateway such as Stripe or Razorpay.
+- Connect a backend database (like MongoDB or PostgreSQL) for persisting cart states and processing real orders.
+- Add user authentication (via NextAuth) to support persistent profiles and order histories.
