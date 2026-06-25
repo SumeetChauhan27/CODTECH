@@ -1,6 +1,9 @@
+"use client";
+
 import { FaStar } from "react-icons/fa";
 import { FiShoppingCart, FiHeart } from "react-icons/fi";
 import QuantityStepper from "@/components/ui/QuantityStepper";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function ProductInfo({
   product,
@@ -13,12 +16,16 @@ export default function ProductInfo({
   handleAddToCart,
   setActiveTab
 }) {
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  
   const isColorRequired = product.colors?.length > 0;
   const isSizeRequired = product.sizes?.length > 0;
   
   const canAddToCart = product.inStock && 
     (!isColorRequired || selectedColor) && 
     (!isSizeRequired || selectedSize);
+
+  const isWishlist = isInWishlist(product.id);
 
   return (
     <>
@@ -126,8 +133,11 @@ export default function ProductInfo({
               : "Add to Cart"}
         </button>
         
-        <button className="h-14 w-14 flex-shrink-0 flex items-center justify-center border-2 border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors">
-          <FiHeart size={24} />
+        <button 
+          onClick={() => toggleWishlist(product)}
+          className="h-14 w-14 flex-shrink-0 flex items-center justify-center border-2 border-gray-200 rounded-xl text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors"
+        >
+          <FiHeart size={24} className={isWishlist ? "fill-red-500 text-red-500" : ""} />
         </button>
       </div>
     </>

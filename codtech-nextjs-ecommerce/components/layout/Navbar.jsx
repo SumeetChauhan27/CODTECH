@@ -1,24 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FiSearch, FiHeart, FiShoppingCart, FiUser, FiMenu, FiX, FiShoppingBag } from "react-icons/fi";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { totalItems } = useCart();
+  const { wishlistItems } = useWishlist();
+  
+  // Initialize search query from URL to fix persistence issue
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const query = searchParams.get("search");
+    if (query) {
+      setSearchQuery(query);
+      setIsSearchOpen(true);
+    }
+  }, [searchParams]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
-      setIsSearchOpen(false);
+    } else {
+      router.push('/products');
     }
   };
 
@@ -62,7 +76,7 @@ export default function Navbar() {
                 <input
                   type="text"
                   placeholder="Search products..."
-                  className="px-3 py-1 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-orange-600"
+                  className="px-3 py-1 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-orange-600 text-gray-900"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
@@ -77,9 +91,14 @@ export default function Navbar() {
               </button>
             )}
 
-            <button className="p-2 text-gray-600 hover:text-orange-600 transition-colors">
+            <Link href="/wishlist" className="p-2 text-gray-600 hover:text-orange-600 transition-colors relative">
               <FiHeart size={20} />
-            </button>
+              {wishlistItems.length > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">
+                  {wishlistItems.length}
+                </span>
+              )}
+            </Link>
 
             <Link href="/cart" className="p-2 text-gray-600 hover:text-orange-600 transition-colors relative">
               <FiShoppingCart size={20} />
@@ -90,9 +109,9 @@ export default function Navbar() {
               )}
             </Link>
 
-            <button className="p-2 text-gray-600 hover:text-orange-600 transition-colors">
+            <Link href="/profile" className="p-2 text-gray-600 hover:text-orange-600 transition-colors">
               <FiUser size={20} />
-            </button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -123,7 +142,7 @@ export default function Navbar() {
               <input
                 type="text"
                 placeholder="Search..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-orange-600"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-orange-600 text-gray-900"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -144,12 +163,17 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="flex space-x-4 px-3 py-2 border-t border-gray-100 mt-2">
-              <button className="flex items-center text-gray-600 hover:text-orange-600">
+              <Link href="/wishlist" className="flex items-center text-gray-600 hover:text-orange-600">
                 <FiHeart className="mr-2" /> Wishlist
-              </button>
-              <button className="flex items-center text-gray-600 hover:text-orange-600">
+                {wishlistItems.length > 0 && (
+                  <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                    {wishlistItems.length}
+                  </span>
+                )}
+              </Link>
+              <Link href="/profile" className="flex items-center text-gray-600 hover:text-orange-600">
                 <FiUser className="mr-2" /> Account
-              </button>
+              </Link>
             </div>
           </div>
         </div>

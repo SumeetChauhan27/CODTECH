@@ -2,7 +2,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { Suspense } from "react";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -16,14 +18,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${inter.className} bg-gray-50 flex flex-col min-h-screen text-gray-900`}>
-        <CartProvider>
-          <Navbar />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
-          <Toaster position="bottom-right" />
-        </CartProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <Suspense fallback={<div className="h-16 w-full bg-white/80 border-b border-gray-200"></div>}>
+              <Navbar />
+            </Suspense>
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+            <Toaster position="bottom-right" />
+          </CartProvider>
+        </WishlistProvider>
       </body>
     </html>
   );

@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FiHeart, FiShoppingCart } from "react-icons/fi";
 import { FaStar } from "react-icons/fa";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
-  const [isWishlist, setIsWishlist] = useState(false);
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  
+  const isWishlist = isInWishlist(product.id);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -23,10 +26,10 @@ export default function ProductCard({ product }) {
     addToCart(product, 1, Object.keys(defaultVariant).length > 0 ? defaultVariant : null);
   };
 
-  const toggleWishlist = (e) => {
+  const handleToggleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlist(!isWishlist);
+    toggleWishlist(product);
   };
 
   return (
@@ -42,7 +45,7 @@ export default function ProductCard({ product }) {
         
         {/* Wishlist Button */}
         <button 
-          onClick={toggleWishlist}
+          onClick={handleToggleWishlist}
           className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur hover:bg-white text-gray-600 hover:text-red-500 transition-colors z-10"
         >
           <FiHeart className={isWishlist ? "fill-red-500 text-red-500" : ""} />

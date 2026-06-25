@@ -18,6 +18,8 @@ export const CartProvider = ({ children }) => {
   const totalPrice = items.reduce((total, item) => total + (item.price * item.quantity), 0);
 
   const addToCart = (product, quantity = 1, variant = null) => {
+    let isNewItem = true;
+    
     setItems((prevItems) => {
       // Check if this exact product+variant combination is already in the cart
       const existingItemIndex = prevItems.findIndex(
@@ -28,12 +30,10 @@ export const CartProvider = ({ children }) => {
         // If it exists, just increment the quantity
         const newItems = [...prevItems];
         newItems[existingItemIndex].quantity += quantity;
-        toast.success(`Increased ${product.name} quantity in cart!`);
         return newItems;
       }
 
       // If it doesn't exist, push a new line item
-      toast.success(`Added ${product.name} to cart!`);
       return [
         ...prevItems,
         {
@@ -46,6 +46,8 @@ export const CartProvider = ({ children }) => {
         }
       ];
     });
+    
+    toast.success(`Added ${product.name} to cart!`);
   };
 
   const removeFromCart = (productId, variant = null) => {

@@ -17,7 +17,7 @@ export default function PaymentMethod() {
         <div className="sm:col-span-2">
           <label className="block text-sm font-bold text-gray-700 mb-2">Card Number</label>
           <div className="relative">
-            <input type="text" required pattern="[0-9]{16}" maxLength="16" className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-orange-500 outline-none transition-colors bg-gray-50 focus:bg-white font-mono" placeholder="0000 0000 0000 0000" />
+            <input type="text" required pattern="[0-9]{16}" maxLength="16" className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-orange-500 outline-none transition-colors bg-gray-50 focus:bg-white font-mono text-gray-900" placeholder="0000 0000 0000 0000" />
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -27,11 +27,11 @@ export default function PaymentMethod() {
         </div>
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">Expiry Date</label>
-          <input type="text" required pattern="(0[1-9]|1[0-2])\/[0-9]{2}" maxLength="5" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-orange-500 outline-none transition-colors bg-gray-50 focus:bg-white font-mono" placeholder="MM/YY" />
+          <input type="text" required pattern="(0[1-9]|1[0-2])\/[0-9]{2}" maxLength="5" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-orange-500 outline-none transition-colors bg-gray-50 focus:bg-white font-mono text-gray-900" placeholder="MM/YY" />
         </div>
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">CVV</label>
-          <input type="password" required pattern="[0-9]{3,4}" maxLength="4" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-orange-500 outline-none transition-colors bg-gray-50 focus:bg-white font-mono tracking-widest" placeholder="***" />
+          <input type="password" required pattern="[0-9]{3,4}" maxLength="4" className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-orange-500 outline-none transition-colors bg-gray-50 focus:bg-white font-mono tracking-widest text-gray-900" placeholder="***" />
         </div>
       </div>
     </div>

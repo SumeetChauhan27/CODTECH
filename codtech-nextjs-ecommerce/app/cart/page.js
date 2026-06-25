@@ -66,7 +66,7 @@ export default function CartPage() {
                 placeholder="Enter promo code (Try SAVE10)" 
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-orange-500 outline-none transition-colors"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-orange-500 outline-none transition-colors text-gray-900"
               />
               <button 
                 onClick={applyCoupon}

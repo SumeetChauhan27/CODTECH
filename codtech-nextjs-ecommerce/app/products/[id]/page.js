@@ -6,7 +6,8 @@ import Breadcrumb from "@/components/ui/Breadcrumb";
 import ProductCard from "@/components/ui/ProductCard";
 
 export async function generateMetadata({ params }) {
-  const product = products.find((p) => p.id === params.id);
+  const { id } = await params;
+  const product = products.find((p) => p.id === id);
   if (!product) return { title: "Product Not Found" };
   return {
     title: `${product.name} | ShopEase`,
@@ -20,8 +21,9 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function ProductDetailPage({ params }) {
-  const product = products.find((p) => p.id === params.id);
+export default async function ProductDetailPage({ params }) {
+  const { id } = await params;
+  const product = products.find((p) => p.id === id);
   if (!product) notFound();
 
   // Find related products (same category, exclude current)
