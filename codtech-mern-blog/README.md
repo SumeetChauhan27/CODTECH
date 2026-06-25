@@ -104,13 +104,17 @@ cd CODTECH/codtech-mern-blog
 ## 📸 Screenshots
 
 - **Homepage (Public Feed):** A clean, modern feed of all blog posts.
-![Homepage](screenshots/homepage.png)
+![Homepage](screenshots/Hone_page.png)
 
 - **User Authentication:** Secure and beautiful login/register forms.
-![Login Page](screenshots/login.png)
+![Login Page](screenshots/login_page.png)
 
 - **Create/Edit Post:** Distraction-free writing environment.
-![Write Post](screenshots/create_post.png)
+![Write Post](screenshots/Write_Blog.png)
+
+- **MongoDB Database:** Scalable cloud database storing Users and Posts.
+![MongoDB Users](screenshots/MongoDB_users.png)
+![MongoDB Posts](screenshots/MongoDB_posts.png)
 
 *(Note: Actual screenshots are available in the `screenshots` directory).*
 
