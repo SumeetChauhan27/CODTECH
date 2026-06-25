@@ -28,7 +28,7 @@ export default function Navbar() {
                   <span className="font-medium">{user.name}</span>
                 </div>
                 {/* We will build the Create Post page in Phase 4 */}
-                <Link to="/" className="flex items-center bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-md font-medium transition">
+                <Link to="/create" className="flex items-center bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-md font-medium transition">
                   <PenSquare size={18} className="mr-2" />
                   Write
                 </Link>

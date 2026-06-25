@@ -1,19 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-
-function Home() {
-  return (
-    <div className="max-w-6xl mx-auto px-4 py-16 text-center">
-      <h1 className="text-5xl font-extrabold text-slate-800 tracking-tight">Welcome to the Blog</h1>
-      <p className="text-xl text-slate-600 mt-6 max-w-2xl mx-auto leading-relaxed">
-        This is a temporary home page. In the next phase, we will replace this with a beautiful feed of all our blog posts pulled directly from MongoDB!
-      </p>
-    </div>
-  );
-}
+import CreatePost from './pages/CreatePost';
 
 function App() {
   return (
@@ -26,6 +17,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/create" element={<CreatePost />} />
             </Routes>
           </main>
         </div>
