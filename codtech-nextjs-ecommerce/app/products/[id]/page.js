@@ -1,48 +1,51 @@
+import React from "react";
+import { notFound } from "next/navigation";
 import { products } from "@/data/products";
 import ProductDetailClient from "@/components/productDetail/ProductDetailClient";
-import Link from "next/link";
-import { FiArrowLeft } from "react-icons/fi";
+import Breadcrumb from "@/components/ui/Breadcrumb";
+import ProductCard from "@/components/ui/ProductCard";
 
-export function generateMetadata({ params }) {
-  const product = products.find(p => p.id === params.id);
+export async function generateMetadata({ params }) {
+  const product = products.find((p) => p.id === params.id);
   if (!product) return { title: "Product Not Found" };
   return {
     title: `${product.name} | ShopEase`,
-    description: product.description
+    description: product.description,
   };
 }
 
-// Generate static params so the pages can be statically exported/built
-export function generateStaticParams() {
-  return products.map(product => ({
-    id: String(product.id),
+export async function generateStaticParams() {
+  return products.map((product) => ({
+    id: product.id,
   }));
 }
 
 export default function ProductDetailPage({ params }) {
-  const product = products.find(p => p.id === params.id);
+  const product = products.find((p) => p.id === params.id);
+  if (!product) notFound();
 
-  if (!product) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center bg-gray-50">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Product Not Found</h1>
-        <p className="text-lg text-gray-500 mb-8 text-center max-w-md">The product you are looking for might have been removed or does not exist.</p>
-        <Link href="/products" className="bg-orange-600 hover:bg-orange-700 text-white font-medium px-8 py-3 rounded-full transition-colors shadow-md">
-          Back to Products
-        </Link>
-      </div>
-    );
-  }
+  // Find related products (same category, exclude current)
+  const relatedProducts = products
+    .filter(p => p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
 
   return (
-    <div className="bg-white min-h-screen pt-4 pb-20">
+    <div className="bg-white min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <Link href="/products" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-orange-600 transition-colors bg-gray-50 px-4 py-2 rounded-lg">
-            <FiArrowLeft className="mr-2" /> Back to Products
-          </Link>
-        </div>
+        <Breadcrumb category={product.category} name={product.name} />
         <ProductDetailClient product={product} />
+        
+        {/* Related Products Section */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-24 border-t border-gray-100 pt-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">You May Also Like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map(p => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
